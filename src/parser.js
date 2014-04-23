@@ -95,7 +95,7 @@ function parse(notations, tokens) {
                               v.notation.replacement);
       left = replacement;
     } else if (isMetaVariable(v.unconsumed[0])) {
-      return { ParseError: { at: i }};
+      return { ParseError: { at: tokenIndex }};
     } else {
       return { ParseError: { Expected: v.unconsumed[0], at: tokenIndex }};
     }
@@ -139,6 +139,7 @@ function parse(notations, tokens) {
     }
   };
 
+  loop:
   for (tokenIndex = 0; tokenIndex < tokens.length; ++tokenIndex) {
     var tk = tokens[tokenIndex];
 
@@ -151,7 +152,7 @@ function parse(notations, tokens) {
             return err;
           }
           if (! left) {
-            return { ParseError: { at: tokenIndex } };
+            return { ParseError: { at: tokenIndex }};
           }
           var v = {
             notation: notation,
@@ -169,6 +170,26 @@ function parse(notations, tokens) {
           stack.push(v);
         }
       } else {
+        for (var i = stack.length - 1; i >= 0; --i) {
+          var v = stack[i];
+          if (v.unconsumed[0] === tk.token) {
+            v.unconsumed = v.unconsumed.slice(1);
+            continue loop;
+          }
+          else if (v.unconsumed[1] === tk.token) {
+            var err = takeOperand();
+            if (err) {
+              return err;
+            }
+            v.unconsumed = v.unconsumed.slice(1);
+            continue loop;
+          } else {
+            var err = reduce1();
+            if (err) {
+              return err;
+            }
+          }
+        }
       }
     } else if (left) {
       var notation = map[""];

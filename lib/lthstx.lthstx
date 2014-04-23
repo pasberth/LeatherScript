@@ -1,0 +1,14 @@
+Token ",";
+Token ";";
+
+Syntax "$a ; $b" := "@SEQUENCE $a $b",
+       level 1, right associativity;
+
+Syntax "Token $a" := "@TOKEN $a",
+       level 2, no associativity;
+
+Syntax "Syntax $a := $b, level $c, $d associativity" := "@SYNTAX $a $b $c $d",
+       level 2, no associativity;
+
+Syntax "Notation $a := $b, level $c, $d associativity" := "@NOTATION $a $b $c $d",
+       level 2, no associativity
