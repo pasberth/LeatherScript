@@ -96,10 +96,8 @@ function parse(notations, tokens) {
       left = replacement;
     } else if (isMetaVariable(v.unconsumed[0])) {
       return { ParseError: { at: i }};
-      // throw "parse error on input `" + tokens[i].token + "'";
     } else {
       return { ParseError: { Expected: v.unconsumed[0], at: tokenIndex }};
-      // throw v.unconsumed[0] + " expected";
     }
   };
 
@@ -117,11 +115,6 @@ function parse(notations, tokens) {
   };
 
   var reduceGroup = function (notation) {
-    //var reduce1 = function () {
-    //  takeOperand();
-    //  return reduce();
-    //};
-
     for (var i = stack.length - 1; i >= 0; --i) {
       var v = stack[i];
       if (v.notation.level < notation.level) {
@@ -141,10 +134,7 @@ function parse(notations, tokens) {
                  notation.associativity.right) {
         return;
       } else {
-        //console.log(v);
-  //console.log(notation);
         return { ParseError: { CantAssoc: [v, notation], at: tokenIndex }};
-        // throw "can't assoc";
       }
     }
   };
