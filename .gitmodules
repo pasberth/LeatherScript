@@ -1,0 +1,3 @@
+[submodule "paradocs"]
+	path = paradocs
+	url = git@github.com:pasberth/paradocs.git
