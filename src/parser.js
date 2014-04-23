@@ -5,8 +5,8 @@ function isMetaVariable(tk) {
 function subst(env, replacement) {
   if (Array.isArray(replacement)) {
     return replacement.map(function (item) { return subst(env, item); });
-  } else if (isMetaVariable(replacement)) {
-    return env[replacement];
+  } else if (isMetaVariable(replacement.token)) {
+    return env[replacement.token];
   } else {
     return replacement;
   }
