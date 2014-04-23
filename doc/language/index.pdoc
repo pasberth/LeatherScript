@@ -1,0 +1,47 @@
+%include ../../paradocs/lib/stdhtml.pdoc
+
+%html
+%head
+:simple.css:
+%body
+
+= LeatherScript Programming Language
+
+== Notation
+
+LeatherScript ではユーザが自由に構文を定義することができます。
+
+まずは +Token+ 命令によって、トークンとして認識される文字列を定義
+します。 +Token+ 命令によって定義された文字列以外は、空白で区切ったものが
+ひとつのトークンとして解釈されます。
+たとえば、 +Token \".\"+ と定義すれば、 +a.b+ は +a+ と +.+ と +b+ のみっつの
+トークンとして解釈されます。
++Token \".\"+ を定義しなければ、 +a.b+ は +a.b+ のひとつのトークンとして
+解釈されます。
++a b+ は、
+そのままで +a+ と +b+ のふたつのトークンとして解釈されます。
+
+%pre"""
+Token "."
+"""
+
++Notation+ 命令で、トークンの列がどのような構文木として解釈されるか
+定義します。優先順位と結合規則も定義します。
+
+%pre"""
+Notation "$a ++ $b" := "$a.concat($b)"
+         level 5 right associativity
+"""
+
+例として、手続き型言語風の構文を定義して使用する完全な例を示します。
+
+%code-frame
+%title procedural.lthstx
+%content%read"../../examples/procedural.lthstx"
+
+上記の +procedural.lthstx+ を定義すれば、次のようなコードを
+コンパイルできるようになります。
+
+%code-frame
+%title procedural.lth
+%content%read"../../examples/procedural.lth"
