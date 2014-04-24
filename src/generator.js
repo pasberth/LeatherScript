@@ -23,10 +23,10 @@ function generate(ast) {
           expressions: [x, y]
         };
       }
-    } else if (ast.ast.length > 2) {
-      console.log(ast.ast[2]);
-      var ast1 = generate(ast.ast[1]);
-      var ast2 = generate(ast.ast[2]);
+    }  else if (ast.ast.length > 1) {
+      console.log(ast.ast[1]);
+      var ast1 = generate(ast.ast[0]);
+      var ast2 = generate(ast.ast[1]);
       return {
         type: "CallExpression",
         callee: ast1,
