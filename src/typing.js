@@ -1,3 +1,14 @@
+function typePP(type) {
+  if (type.simple) {
+    return type.simple
+  } else if (type.variant) {
+    return "(" + type.variant.tag + " of " + typePP(type.variant.val) + ")"
+  } else if (type.arrow) {
+    return "(" + typePP(type.arrow[0]) + " -> " + typePP(type.arrow[1]) + ")" 
+  } else if (type.forall) {
+    return type.forall;
+  }
+}
 function mkType(ast) {
   if (ast.ast) {
     if (ast.ast[0].token === "@SIMPLE") {
@@ -114,12 +125,9 @@ function printErrors(ast) {
     };
 
     if (ast.type && ast.type.TypeError && ast.type.TypeError.Expected) {
-      console.log(ast);
       console.log(showLocation(ast));
-      console.log("expected: ");
-      console.log(JSON.stringify(ast.type.TypeError.Expected));
-      console.log("but got: ");
-      console.log(JSON.stringify(ast.type.TypeError.Got));
+      console.log("Expected type: " + typePP(ast.type.TypeError.Expected));
+      console.log("  Actual type: " + typePP(ast.type.TypeError.Got));
     }
   } else if (ast.token) {
     if (ast.type && ast.type.TypeError) {
