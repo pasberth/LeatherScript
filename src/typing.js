@@ -2,10 +2,15 @@ function mkType(ast) {
   if (ast.ast) {
     if (ast.ast[0].token === "@SIMPLE") {
       return { simple: ast.ast[1].token };
+    } else if (ast.ast[0].token === "@VARIANT") {
+      var y = mkType(ast.ast[2]);
+      return { variant: { tag: ast.ast[1].token, val: y }}
     } else if (ast.ast[0].token === "@ARROW") {
       var x = mkType(ast.ast[1]);
       var y = mkType(ast.ast[2]);
       return { arrow: [x, y] };
+    } else {
+      return mkType(ast.ast[0]);
     }
 
   } else {
