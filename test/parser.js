@@ -43,7 +43,7 @@ var sexp = function (s) {
       s = s.slice(1);
     } else {
       var ident = "";
-      while (s[0] !== "(" && s[0] !== ")" && s[0] !== " " && s[0] !== '\n') {
+      while (s !== "" && s[0] !== "(" && s[0] !== ")" && s[0] !== " " && s[0] !== '\n') {
         ident += s[0];
         s = s.slice(1);
       }
@@ -127,6 +127,27 @@ describe("postfix notations", function () {
 
   it("a ! ! ! == (! (! (! a)))", function () {
     astEq("a ! ! !", "(! (! (! a)))");
+  });
+});
+
+describe("outfix notations", function () {
+  var notations = [
+    { pattern: ["(","$a",")"],
+      level: "9999",
+      associativity: {},
+      replacement: [{ token: "$a"}]
+    }
+  ];
+  var astEq = mkAstEq(notations);
+
+  it("(a) == a", function () {
+    astEq("( a )", "(a)");
+  });
+  it("((a)) == a", function () {
+    astEq("( ( a ) )", "((a))");
+  });
+  it("(((a))) == a", function () {
+    astEq("( ( ( a ) ) )", "(((a)))");
   });
 });
 
@@ -266,5 +287,109 @@ describe("infix notations", function () {
   });
   it("f x + g x == (+ (f x) (g x))", function () {
     astEq("f x + g x", "(+ (f x) (g x))");
+  });
+});
+
+describe("complex notations", function () {
+  var notations = [
+    { pattern: ["~", "$a"],
+      level: "35",
+      associativity: rightAssoc,
+      replacement: [{ token: "~"}, { token: "$a"}]
+    },
+    { pattern: ["if", "$a", "then", "$b", "else", "$c"],
+      level: "05",
+      associativity: rightAssoc,
+      replacement: [{ token: "if-then-else"}, { token: "$a" }, { token: "$b" }, { token: "$c"}]
+    },
+    { pattern: ["$a", "!"],
+      level: "8",
+      associativity: leftAssoc,
+      replacement: [{ token: "!"}, { token: "$a"}]
+    },
+    { pattern: ["(","$a",")"],
+      level: "0",
+      associativity: {},
+      replacement: [{ token: "$a"}]
+    },
+    { pattern: ["$a","+","$b"],
+      level: "6",
+      associativity: leftAssoc,
+      replacement: [{ token: "+" }, { token: "$a" }, { token: "$b"}]
+    },
+    { pattern: ["$a","-","$b"],
+      level: "6",
+      associativity: leftAssoc,
+      replacement: [{ token: "-" }, { token: "$a" }, { token: "$b"}]
+    },
+    { pattern: ["$a", "*", "$b"],
+      level: "7",
+      associativity: leftAssoc,
+      replacement: [{ token: "*" }, { token: "$a" }, { token: "$b"}]
+    },
+    { pattern: ["$a", "/", "$b"],
+      level: "7",
+      associativity: leftAssoc,
+      replacement: [{ token: "/" }, { token: "$a" }, { token: "$b"}]
+    },
+    { pattern: ["$a", "=", "$b"],
+      level: "4",
+      associativity: {},
+      replacement: [{ token: "=" }, { token: "$a" }, { token: "$b"}]
+    },
+    { pattern: ["$a", "?", "$b", ":", "$c"],
+      level: "1",
+      associativity: rightAssoc,
+      replacement: [{ token: "?:" }, { token: "$a" }, { token: "$b"}, { token: "$c" }]
+    },
+    { pattern: ["$a", "and", "$b"],
+      level: "3",
+      associativity: rightAssoc,
+      replacement: [{ token: "and" }, { token: "$a" }, { token: "$b"}]
+    },
+    { pattern: ["$a", "or", "$b"],
+      level: "2",
+      associativity: rightAssoc,
+      replacement: [{ token: "or" }, { token: "$a" }, { token: "$b"}]
+    },
+    { pattern: ["$a", ".", "$b"],
+      level: "99",
+      associativity: leftAssoc,
+      replacement: [{ token: "." }, { token: "$a" }, { token: "$b"}]
+    },
+    { pattern: ["$a", "$b"],
+      level: "9",
+      associativity: leftAssoc,
+      replacement: [{ token: "$a" }, { token: "$b"}]
+    }
+  ];
+  var astEq = mkAstEq(notations);
+
+  it("(a + b) == (+ a b)", function () {
+    astEq("( a + b )", "((+ a b))");
+  });
+  it("a * (b + c) == (* a (+ b c))", function () {
+    astEq("a * ( b + c )", "(* a ((+ b c)))");
+  });
+  it("a + b (c) == (+ a (b c))", function () {
+    astEq("a + b ( c )", "(+ a (b (c)))");
+  });
+  it("~ a = b == (~ (= a b))", function () {
+    astEq("~ a = b", "(~ (= a b))");
+  });
+  it("if a and b then c + d else e + f == (if-then-else (and a b) (+ c d) (+ e f))", function () {
+    astEq("if a and b then c + d else e + f", "(if-then-else (and a b) (+ c d) (+ e f))");
+  });
+  it("~ a ! + ~ b ! == (~ (+ (! a) (~ (! b))))", function () {
+    astEq("~ a ! + ~ b !", "(~ (+ (! a) (~ (! b))))");
+  });
+  it("x . f ( x ) == ((. x f) x)", function () {
+    astEq("x . f ( x )", "((. x f) (x))");
+  });
+  it("x . f ( x + y ) == ((. x f) (+ x y))", function () {
+    astEq("x . f ( x + y )", "((. x f) ((+ x y)))");
+  });
+  it("x . f ( x + y ) + z == ((. x f) (+ (+ x y) z))", function () {
+    astEq("x . f ( x + y ) + z", "(+ ((. x f) ((+ x y))) z)");
   });
 });

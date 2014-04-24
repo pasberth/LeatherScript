@@ -162,6 +162,24 @@ function parse(notations, tokens) {
           left = null;
           stack.push(v);
         } else {
+          if (left) {
+            var notation1 = map[""];
+            if (notation) {
+              var err = reduceGroup(notation1);
+              if (err) {
+                return err;
+              }
+              var v = {
+                notation: notation1,
+                args: [left],
+                unconsumed: notation1.pattern.slice(1)
+              };
+              left = null;
+              stack.push(v);
+            } else {
+              return { ParseError: { at: tokenIndex } };
+            }
+          }
           var v = {
             notation: notation,
             args: [],
@@ -174,6 +192,9 @@ function parse(notations, tokens) {
           var v = stack[i];
           if (v.unconsumed[0] === tk.token) {
             v.unconsumed = v.unconsumed.slice(1);
+            if (v.unconsumed.length === 0) {
+              reduce();
+            }
             continue loop;
           }
           else if (v.unconsumed[1] === tk.token) {
@@ -182,6 +203,9 @@ function parse(notations, tokens) {
               return err;
             }
             v.unconsumed = v.unconsumed.slice(1);
+            if (v.unconsumed.length === 0) {
+              reduce();
+            }
             continue loop;
           } else {
             var err = reduce1();
