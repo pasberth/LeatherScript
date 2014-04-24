@@ -1,6 +1,24 @@
 var esprima = require("esprima");
 var escodegen = require("escodegen");
 
+function generatePairs(ast) {
+  if (ast.ast && ast.ast[0].token === "@ORDERED-PAIR") {
+    var l = generate(ast.ast[1]);
+    var r = generatePairs(ast.ast[2]);
+    return [l].concat(r);
+  } else {
+    return [generate(ast)];
+  }
+}
+
+function pairCount(ast) {
+  if (ast.ast && ast.ast[0].token === "@ORDERED-PAIR") {
+    return 1 + pairCount(ast.ast[2]);
+  } else {
+    return 0;
+  }
+}
+
 function generate(ast) {
   if (ast.ast) {
     if (ast.ast[0].token === "@MEMBER") {
@@ -34,11 +52,11 @@ function generate(ast) {
       };
     } else if (ast.ast.length > 1) {
       var ast1 = generate(ast.ast[0]);
-      var ast2 = generate(ast.ast[1]);
+      var ast2 = generatePairs(ast.ast[1]);
       return {
         type: "CallExpression",
         callee: ast1,
-        arguments: [ast2]
+        arguments: ast2
       };
     } else {
       return generate(ast.ast[0]);
