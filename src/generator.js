@@ -12,11 +12,16 @@ function generate(ast) {
         property: prop
       };
     } else if (ast.ast[0].token === "@SEQUENCE") {
-      var x = generate(ast.ast[1]);
-      var y = generate(ast.ast[2]);
-      return {
-        type: "SequenceExpression",
-        expressions: [x, y]
+      if (ast.ast[1].ast && ast.ast[1].ast[0].token === "@ASCRIBE") {
+        var y = generate(ast.ast[2]);
+        return y;
+      } else {
+        var x = generate(ast.ast[1]);
+        var y = generate(ast.ast[2]);
+        return {
+          type: "SequenceExpression",
+          expressions: [x, y]
+        }
       }
     } else {
       return ast.ast.map(function (ast1) {
