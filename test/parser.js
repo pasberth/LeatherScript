@@ -8,8 +8,10 @@ var rightAssoc = { right: true };
 var extractTokens = function (ast) {
   if (Array.isArray(ast)) {
     return ast.map(extractTokens);
-  } else {
+  } else if (ast.token) {
     return ast.token;
+  } else {
+    return ast;
   }
 };
 
@@ -17,6 +19,13 @@ var mkAstEq = function (notations) {
   return (function (x, y) {
     var tokens = tokenizer.tokenize([], x);
     assert.deepEqual(extractTokens(parser.parse(notations, tokens)), sexp(y));
+  });
+};
+
+var mkFail = function (notations) {
+  return (function (x, y) {
+    var tokens = tokenizer.tokenize([], x);
+    assert.deepEqual(extractTokens(parser.parse(notations, tokens)), y);
   });
 };
 
@@ -59,6 +68,7 @@ describe("prefix notations", function () {
   ];
 
   var astEq = mkAstEq(notations);
+  var fail = mkFail(notations);
 
   it("~ P == (~ P)", function () {
     astEq("~ P", "(~ P)");
@@ -82,6 +92,18 @@ describe("prefix notations", function () {
 
   it("if if a then b else c then if d then e else f else if g then h else i == (if-then-else (if-then-else a b c) (if-then-else d e f) (if-then-else g h i))", function () {
     astEq("if if a then b else c then if d then e else f else if g then h else i", "(if-then-else (if-then-else a b c) (if-then-else d e f) (if-then-else g h i))");
+  });
+
+  it("if a then b -> parse error", function () {
+    fail("if a then b", { ParseError: { at: 4, Expected: "else" }});
+  });
+
+  it("if a then b else -> parse error", function () {
+    fail("if a then b else", { ParseError: { at: 5 }});
+  });
+
+  it("if a else b then -> parse error", function () {
+    fail("if a else b then", { ParseError: { at: 2, Expected: "then" }});
   });
 });
 
