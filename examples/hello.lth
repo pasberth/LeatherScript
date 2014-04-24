@@ -1,2 +1,3 @@
-console : log of (simple string -> simple unit);
+console : log of (simple string -> simple unit)
+        & info of (simple string -> simple unit);
 console.log "hello world"

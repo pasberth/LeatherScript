@@ -19,6 +19,9 @@ Syntax "$a -> $b" := "@ARROW $a $b",
 Syntax "$a, $b" := "@ORDERED-PAIR $a $b",
        level 0050, right associativity;
 
+Syntax "$a & $b" := "@UNORDERED-PAIR $a $b",
+       level 0050, right associativity;
+
 Syntax "$a of $b" := "@VARIANT $a $b",
        level 0060, right associativity;
 

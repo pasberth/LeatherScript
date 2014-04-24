@@ -7,6 +7,8 @@ function typePP(type) {
     return "(" + typePP(type.arrow[0]) + " -> " + typePP(type.arrow[1]) + ")" 
   } else if (type.forall) {
     return type.forall;
+  } else if (type.upair) {
+    return "(" + typePP(type.upair[0]) + " & " + typePP(type.upair[1]) + ")"
   }
 }
 
@@ -21,6 +23,10 @@ function mkType(ast) {
       var x = mkType(ast.ast[1]);
       var y = mkType(ast.ast[2]);
       return { arrow: [x, y] };
+    } else if (ast.ast[0].token === "@UNORDERED-PAIR") {
+      var x = mkType(ast.ast[1]);
+      var y = mkType(ast.ast[2]);
+      return { upair: [x, y] };
     } else {
       return mkType(ast.ast[0]);
     }
@@ -40,6 +46,42 @@ function eqTy(ty1, ty2) {
   }
 }
 
+function includeTy(ty1, ty2) {
+  if (ty1.simple && ty2.simple && ty1.simple === ty2.simple) {
+    return true;
+  } else if (ty1.variant && ty2.variant && ty1.variant.tag === ty2.variant.tag) {
+    return includeTy(ty1.variant.val, ty2.variant.val);
+  } else if (ty1.forall) {
+    return true;
+  } else {
+    console.log(ty1);
+    console.log(ty2);
+    return false;
+  }
+}
+
+function upairIncludeTy(ty1, ty2) {
+  if (ty2.upair) {
+    return upairIncludeTy(ty1, ty2.upair[0]) || upairIncludeTy(ty1, ty2.upair[1]);
+  } else {
+    return includeTy(ty1, ty2);
+  }
+}
+
+function upairToObj(ty, obj) {
+  if (! obj) {
+    obj = {};
+  }
+  if (ty.upair) {
+    upairToObj(ty.upair[0], obj);
+    upairToObj(ty.upair[1], obj);
+    return obj;
+  } else if (ty.variant) {
+    obj[ty.variant.tag] = ty.variant.val;
+    return obj;
+  }
+}
+
 function typing(ast, env) {
   if (ast.ast) {
     if (ast.ast[0].token === "@MEMBER") {
@@ -47,15 +89,15 @@ function typing(ast, env) {
       if (!ast.ast[1].type || ast.ast[1].type.TypeError) {
         return;
       }
-      if (ast.ast[1].type.variant &&
-          ast.ast[1].type.variant.tag === ast.ast[2].token) {
-        ast.type = ast.ast[1].type.variant.val;
+      var expected = { variant:
+                         { tag: ast.ast[2].token,
+                           val: { forall: "'a" }}}
+      if (upairIncludeTy(expected, ast.ast[1].type)) {
+        ast.type = upairToObj(ast.ast[1].type)[ast.ast[2].token].val;
       } else {
         ast.type = { TypeError:
                      { Expected:
-                       { variant:
-                         { tag: ast.ast[2].token,
-                           val: { forall: "'a" }}},
+                       expected,
                        Got: ast.ast[1].type } };
       }
     } else if (ast.ast[0].token === "@VARIANT") {
