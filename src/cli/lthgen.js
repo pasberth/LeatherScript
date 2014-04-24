@@ -15,7 +15,5 @@ fs.readFile(path, 'utf8', function (err1, text1) {
   var lth_json = JSON.parse(text1);
   typing.typing(lth_json, {});
   typing.printErrors(lth_json);
-  console.log(JSON.stringify(lth_json, null, 2));
-
   console.log(escodegen.generate(generator.generate(lth_json)));
 });

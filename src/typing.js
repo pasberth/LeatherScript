@@ -1,3 +1,13 @@
+function mkType(ast) {
+  if (ast.ast) {
+    if (ast.ast[0].token === "@SIMPLE") {
+      return { simple: ast.ast[1].token };
+    }
+  } else {
+    throw "an error occurred";
+  }
+}
+
 function typing(ast, env) {
   if (ast.ast) {
     if (ast.ast[0].token === "@MEMBER") {
@@ -16,6 +26,23 @@ function typing(ast, env) {
                            val: { forall: "'a" }}},
                        Got: ast.ast[1].type } };
       }
+    } else if (ast.ast[0].token === "@SEQUENCE") {
+      typing(ast.ast[1], env);
+      typing(ast.ast[2], env);
+      if (!ast.ast[1].type || !ast.ast[2].type || ast.ast[1].type.TypeError || ast.ast[2].type.TypeError) {
+        return;
+      }
+      if (ast.ast[1].type.simple === "unit") {
+        ast.type = ast.ast[1].type;
+      } else {
+        ast.type = { TypeError:
+          { Expected: { simple: "unit" },
+            Got: ast.ast[1].type
+          }
+        }
+      }
+    } else if (ast.ast[0].token === "@ASCRIBE") {
+      env[ast.ast[1].token] = mkType(ast.ast[2]);
     } else {
       typing(ast.ast[0], env);
       typing(ast.ast[1], env);
