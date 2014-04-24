@@ -134,7 +134,7 @@ function parse(notations, tokens) {
                  notation.associativity.right) {
         return;
       } else {
-        return { ParseError: { CantAssoc: [v, notation], at: tokenIndex }};
+        return { ParseError: { CantAssoc: [v.notation, notation], at: tokenIndex + 1 }};
       }
     }
   };

@@ -154,7 +154,7 @@ describe("infix notations", function () {
     },
     { pattern: ["$a", "=", "$b"],
       level: "4",
-      associativity: rightAssoc,
+      associativity: {},
       replacement: [{ token: "=" }, { token: "$a" }, { token: "$b"}]
     },
     { pattern: ["$a", "?", "$b", ":", "$c"],
@@ -184,6 +184,8 @@ describe("infix notations", function () {
     }
   ];
   var astEq = mkAstEq(notations);
+  var fail = mkFail(notations);
+
   it("(a + b) == (+ a b)", function () {
     astEq("a + b", "(+ a b)");
   });
@@ -225,6 +227,9 @@ describe("infix notations", function () {
   });
   it("(a = b and c = d) == (and (= a b) (= c d))", function () {
     astEq("a = b and c = d", "(and (= a b) (= c d))");
+  });
+  it("(a = b = c) -> parse error", function () {
+    fail("a = b = c", { CantAssoc: "todo????", at: 4 });
   });
   it("(a or b and c or d) == (or a (or (and b c) d))", function () {
     astEq("a or b and c or d", "(or a (or (and b c) d))");
