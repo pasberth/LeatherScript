@@ -1,0 +1,20 @@
+Token ".";
+Token ";";
+Token ",";
+Token "(";
+Token ")";
+
+Syntax "($a)" := "$a",
+        level 0, no associativity;
+
+Syntax "$a; $b" := "@SEQUENCE $a $b",
+       level 0000, right associativity;
+
+Syntax "$a, $b" := "@ORDERED-PAIR $a $b",
+       level 0050, right associativity;
+
+Syntax "$a $b" := "$a $b",
+       level 8500, left associativity;
+
+Syntax "$a.$b" := "@MEMBER $a $b",
+       level 9000, left associativity
