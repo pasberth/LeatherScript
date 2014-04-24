@@ -85,6 +85,29 @@ describe("prefix notations", function () {
   });
 });
 
+describe("postfix notations", function () {
+  var notations = [
+    { pattern: ["$a", "!"],
+      level: "8",
+      associativity: leftAssoc,
+      replacement: [{ token: "!"}, { token: "$a"}]
+    }
+  ];
+
+  var astEq = mkAstEq(notations);
+  it("a ! == (! a)", function () {
+    astEq("a !", "(! a)");
+  });
+
+  it("a ! ! == (! (! a))", function () {
+    astEq("a ! !", "(!(! a))");
+  });
+
+  it("a ! ! ! == (! (! (! a)))", function () {
+    astEq("a ! ! !", "(! (! (! a)))");
+  });
+});
+
 describe("infix notations", function () {
   var notations = [
     { pattern: ["$a","+","$b"],
