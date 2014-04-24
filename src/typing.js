@@ -9,6 +9,7 @@ function typePP(type) {
     return type.forall;
   }
 }
+
 function mkType(ast) {
   if (ast.ast) {
     if (ast.ast[0].token === "@SIMPLE") {
@@ -26,6 +27,16 @@ function mkType(ast) {
 
   } else {
     throw "an error occurred";
+  }
+}
+
+function eqTy(ty1, ty2) {
+  if (ty1.simple && ty2.simple && ty1.simple === ty2.simple) {
+    return true;
+  } else {
+    console.log(ty1);
+    console.log(ty2);
+    return false;
   }
 }
 
@@ -71,14 +82,14 @@ function typing(ast, env) {
       }
     } else if (ast.ast[0].token === "@ASCRIBE") {
       env[ast.ast[1].token] = mkType(ast.ast[2]);
-    } else {
+    } else if (ast.ast.length > 1) {
       typing(ast.ast[0], env);
       typing(ast.ast[1], env);
       if (!ast.ast[0].type || !ast.ast[1].type || ast.ast[0].type.TypeError || ast.ast[1].type.TypeError) {
         return;
       }
       if (ast.ast[0].type.arrow) {
-         if (ast.ast[0].type.arrow[0].simple === ast.ast[1].type.simple) {
+         if (eqTy(ast.ast[0].type.arrow[0], ast.ast[1].type)) {
            ast.type = ast.ast[0].type.arrow[1];
          } else {
            ast.type = { TypeError:
@@ -94,6 +105,9 @@ function typing(ast, env) {
                      }
                    };
       }
+    } else {
+      typing(ast.ast[0]);
+      ast.type = ast.ast[0].type;
     }
   } else if (ast.token) {
     if (ast.token[0] === '"') {
