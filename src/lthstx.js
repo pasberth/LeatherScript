@@ -1,4 +1,5 @@
 var tokenizer = require('./tokenizer');
+var parser = require('./parser');
 
 function lthstx (ast, stxdef) {
   if (! stxdef) {
@@ -17,6 +18,22 @@ function lthstx (ast, stxdef) {
                                        ast[1].token.slice(1, -1)).map(function (tk) { return tk.token; });
       var replacement = tokenizer.tokenize(stxdef.tokens,
                                            ast[2].token.slice(1, -1));
+      var level = ast[3].token;
+      var associativity = {};
+      associativity[ast[4].token] = true;
+      
+      var notation = { pattern: pattern,
+                       replacement: replacement,
+                       level: level,
+                       associativity: associativity};
+      var notations = stxdef.notations.concat([notation]);
+      return { tokens: stxdef.tokens, notations: notations };
+    } else if (ast[0].token === "@NOTATION") {
+      var pattern = tokenizer.tokenize(stxdef.tokens,
+                                       ast[1].token.slice(1, -1)).map(function (tk) { return tk.token; });
+      var replacement = parser.parse(stxdef.notations,
+                                     tokenizer.tokenize(stxdef.tokens,
+                                                        ast[2].token.slice(1, -1)));
       var level = ast[3].token;
       var associativity = {};
       associativity[ast[4].token] = true;
