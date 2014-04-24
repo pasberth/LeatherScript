@@ -44,6 +44,47 @@ var sexp = function (s) {
   return stack[0][0];
 };
 
+describe("prefix notations", function () {
+  var notations = [
+    { pattern: ["~", "$a"],
+      level: "35",
+      associativity: rightAssoc,
+      replacement: [{ token: "~"}, { token: "$a"}]
+    },
+    { pattern: ["if", "$a", "then", "$b", "else", "$c"],
+      level: "0",
+      associativity: rightAssoc,
+      replacement: [{ token: "if-then-else"}, { token: "$a" }, { token: "$b" }, { token: "$c"}]
+    }
+  ];
+
+  var astEq = mkAstEq(notations);
+
+  it("~ P == (~ P)", function () {
+    astEq("~ P", "(~ P)");
+  });
+
+  it("~ ~ P == (~ (~ P))", function () {
+    astEq("~ ~ P", "(~ (~ P))");
+  });
+
+  it("~ ~ ~ P == (~ (~ (~ P)))", function () {
+    astEq("~ ~ ~ P", "(~ (~ (~ P)))");
+  });
+
+  it("if a then b else c == (if-then-else a b c)", function () {
+    astEq("if a then b else c", "(if-then-else a b c)");
+  });
+
+  it("if ~ a then ~ b else ~ c == (if-then-else (~ a) (~ b) (~ c))", function () {
+    astEq("if ~ a then ~ b else ~ c", "(if-then-else (~ a) (~ b) (~ c))");
+  });
+
+  it("if if a then b else c then if d then e else f else if g then h else i == (if-then-else (if-then-else a b c) (if-then-else d e f) (if-then-else g h i))", function () {
+    astEq("if if a then b else c then if d then e else f else if g then h else i", "(if-then-else (if-then-else a b c) (if-then-else d e f) (if-then-else g h i))");
+  });
+});
+
 describe("infix notations", function () {
   var notations = [
     { pattern: ["$a","+","$b"],
