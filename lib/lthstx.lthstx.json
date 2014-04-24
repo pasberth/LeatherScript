@@ -1,0 +1,167 @@
+[
+  {
+    "lineno": 0,
+    "columnno": 0,
+    "token": "@SEQUENCE"
+  },
+  [
+    {
+      "lineno": 0,
+      "columnno": 0,
+      "token": "@TOKEN"
+    },
+    {
+      "lineno": 0,
+      "columnno": 6,
+      "token": "\",\""
+    }
+  ],
+  [
+    {
+      "lineno": 0,
+      "columnno": 0,
+      "token": "@SEQUENCE"
+    },
+    [
+      {
+        "lineno": 0,
+        "columnno": 0,
+        "token": "@TOKEN"
+      },
+      {
+        "lineno": 1,
+        "columnno": 6,
+        "token": "\";\""
+      }
+    ],
+    [
+      {
+        "lineno": 0,
+        "columnno": 0,
+        "token": "@SEQUENCE"
+      },
+      [
+        {
+          "lineno": 0,
+          "columnno": 0,
+          "token": "@SYNTAX"
+        },
+        {
+          "lineno": 3,
+          "columnno": 7,
+          "token": "\"$a ; $b\""
+        },
+        {
+          "lineno": 3,
+          "columnno": 20,
+          "token": "\"@SEQUENCE $a $b\""
+        },
+        {
+          "lineno": 4,
+          "columnno": 13,
+          "token": "1"
+        },
+        {
+          "lineno": 4,
+          "columnno": 16,
+          "token": "right"
+        }
+      ],
+      [
+        {
+          "lineno": 0,
+          "columnno": 0,
+          "token": "@SEQUENCE"
+        },
+        [
+          {
+            "lineno": 0,
+            "columnno": 0,
+            "token": "@SYNTAX"
+          },
+          {
+            "lineno": 6,
+            "columnno": 7,
+            "token": "\"Token $a\""
+          },
+          {
+            "lineno": 6,
+            "columnno": 21,
+            "token": "\"@TOKEN $a\""
+          },
+          {
+            "lineno": 7,
+            "columnno": 13,
+            "token": "2"
+          },
+          {
+            "lineno": 7,
+            "columnno": 16,
+            "token": "no"
+          }
+        ],
+        [
+          {
+            "lineno": 0,
+            "columnno": 0,
+            "token": "@SEQUENCE"
+          },
+          [
+            {
+              "lineno": 0,
+              "columnno": 0,
+              "token": "@SYNTAX"
+            },
+            {
+              "lineno": 9,
+              "columnno": 7,
+              "token": "\"Syntax $a := $b, level $c, $d associativity\""
+            },
+            {
+              "lineno": 9,
+              "columnno": 56,
+              "token": "\"@SYNTAX $a $b $c $d\""
+            },
+            {
+              "lineno": 10,
+              "columnno": 13,
+              "token": "2"
+            },
+            {
+              "lineno": 10,
+              "columnno": 16,
+              "token": "no"
+            }
+          ],
+          [
+            {
+              "lineno": 0,
+              "columnno": 0,
+              "token": "@SYNTAX"
+            },
+            {
+              "lineno": 12,
+              "columnno": 7,
+              "token": "\"Notation $a := $b, level $c, $d associativity\""
+            },
+            {
+              "lineno": 12,
+              "columnno": 58,
+              "token": "\"@NOTATION $a $b $c $d\""
+            },
+            {
+              "lineno": 13,
+              "columnno": 13,
+              "token": "2"
+            },
+            {
+              "lineno": 13,
+              "columnno": 16,
+              "token": "no"
+            }
+          ]
+        ]
+      ]
+    ]
+  ]
+]
