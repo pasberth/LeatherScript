@@ -9,6 +9,8 @@ function typePP(type) {
     return type.forall;
   } else if (type.upair) {
     return "(" + typePP(type.upair[0]) + " & " + typePP(type.upair[1]) + ")"
+  } else if (type.pair) {
+    return "(" + typePP(type.pair[0]) + " , " + typePP(type.pair[1]) + ")"
   }
 }
 
@@ -27,6 +29,10 @@ function mkType(ast) {
       var x = mkType(ast.ast[1]);
       var y = mkType(ast.ast[2]);
       return { upair: [x, y] };
+    } else if (ast.ast[0].token === "@ORDERED-PAIR") {
+      var x = mkType(ast.ast[1]);
+      var y = mkType(ast.ast[2]);
+      return { pair: [x, y] };
     } else {
       return mkType(ast.ast[0]);
     }
@@ -36,21 +42,13 @@ function mkType(ast) {
   }
 }
 
-function eqTy(ty1, ty2) {
-  if (ty1.simple && ty2.simple && ty1.simple === ty2.simple) {
-    return true;
-  } else {
-    console.log(ty1);
-    console.log(ty2);
-    return false;
-  }
-}
-
 function includeTy(ty1, ty2) {
   if (ty1.simple && ty2.simple && ty1.simple === ty2.simple) {
     return true;
   } else if (ty1.variant && ty2.variant && ty1.variant.tag === ty2.variant.tag) {
     return includeTy(ty1.variant.val, ty2.variant.val);
+  } else if (ty1.pair && ty2.pair) {
+    return includeTy(ty1.pair[0], ty2.pair[0]) && includeTy(ty1.pair[1], ty2.pair[1]);
   } else if (ty1.forall) {
     return true;
   } else {
@@ -107,6 +105,13 @@ function typing(ast, env) {
       }
       var tag = ast.ast[1].token;
       ast.type = { variant: { tag: tag, val: ast.ast[2].type }}
+    } else if (ast.ast[0].token === "@ORDERED-PAIR") {
+      typing(ast.ast[1], env);
+      typing(ast.ast[2], env);
+      if (!ast.ast[1].type || !ast.ast[2].type || ast.ast[1].type.TypeError || ast.ast[2].type.TypeError) {
+        return;
+      }
+      ast.type = { pair: [ast.ast[1].type, ast.ast[2].type] }
     } else if (ast.ast[0].token === "@SEQUENCE") {
       typing(ast.ast[1], env);
       typing(ast.ast[2], env);
@@ -131,7 +136,7 @@ function typing(ast, env) {
         return;
       }
       if (ast.ast[0].type.arrow) {
-         if (eqTy(ast.ast[0].type.arrow[0], ast.ast[1].type)) {
+         if (includeTy(ast.ast[0].type.arrow[0], ast.ast[1].type)) {
            ast.type = ast.ast[0].type.arrow[1];
          } else {
            ast.type = { TypeError:
