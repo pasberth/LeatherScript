@@ -1,2 +1,2 @@
-console : simple string;
+console : simple string -> simple unit;
 console.log "hello world"

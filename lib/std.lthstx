@@ -10,14 +10,17 @@ Syntax "($a)" := "$a",
 Syntax "$a; $b" := "@SEQUENCE $a $b",
        level 0000, right associativity;
 
+Syntax "$a : $b" := "@ASCRIBE $a $b",
+       level 0010, no associativity;
+
+Syntax "$a -> $b" := "@ARROW $a $b",
+       level 0020, right associativity;
+
 Syntax "$a, $b" := "@ORDERED-PAIR $a $b",
        level 0050, right associativity;
 
-Syntax "$a : $b" := "@ASCRIBE $a $b",
-       level 8000, no associativity;
-
 Syntax "simple $a" := "@SIMPLE $a",
-       level 8100, no associativity;
+       level 0090, no associativity;
 
 Syntax "$a $b" := "$a $b",
        level 8500, left associativity;
