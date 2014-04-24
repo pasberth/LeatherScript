@@ -3,8 +3,10 @@ function isMetaVariable(tk) {
 }
 
 function subst(env, replacement) {
-  if (Array.isArray(replacement)) {
-    return replacement.map(function (item) { return subst(env, item); });
+  if (replacement.ast) {
+    return {
+      ast: replacement.ast.map(function (item) { return subst(env, item); })
+    };
   } else if (isMetaVariable(replacement.token)) {
     return env[replacement.token];
   } else {
@@ -94,6 +96,7 @@ function parse(notations, tokens) {
       var replacement = subst(mkEnv(v.args, v.notation.pattern),
                               v.notation.replacement);
       left = replacement;
+      //left.tk = v.tk;
     } else if (isMetaVariable(v.unconsumed[0])) {
       return { ParseError: { at: tokenIndex }};
     } else {
@@ -155,6 +158,7 @@ function parse(notations, tokens) {
             return { ParseError: { at: tokenIndex }};
           }
           var v = {
+            //tk: tk,
             notation: notation,
             args: [left],
             unconsumed: notation.pattern.slice(2)
@@ -170,6 +174,7 @@ function parse(notations, tokens) {
                 return err;
               }
               var v = {
+                //tk: tk,
                 notation: notation1,
                 args: [left],
                 unconsumed: notation1.pattern.slice(1)
@@ -181,6 +186,7 @@ function parse(notations, tokens) {
             }
           }
           var v = {
+            //tk: tk,
             notation: notation,
             args: [],
             unconsumed: notation.pattern.slice(1)
@@ -223,6 +229,7 @@ function parse(notations, tokens) {
           return err;
         }
         var v = {
+          //tk: tk,
           notation: notation,
           args: [left],
           unconsumed: notation.pattern.slice(2)

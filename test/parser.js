@@ -6,8 +6,8 @@ var leftAssoc = { left: true };
 var rightAssoc = { right: true };
 
 var extractTokens = function (ast) {
-  if (Array.isArray(ast)) {
-    return ast.map(extractTokens);
+  if (ast.ast) {
+    return ast.ast.map(extractTokens);
   } else if (ast.token) {
     return ast.token;
   } else {
@@ -58,12 +58,12 @@ describe("prefix notations", function () {
     { pattern: ["~", "$a"],
       level: "35",
       associativity: rightAssoc,
-      replacement: [{ token: "~"}, { token: "$a"}]
+      replacement: {ast: [{ token: "~"}, { token: "$a"}]}
     },
     { pattern: ["if", "$a", "then", "$b", "else", "$c"],
       level: "0",
       associativity: rightAssoc,
-      replacement: [{ token: "if-then-else"}, { token: "$a" }, { token: "$b" }, { token: "$c"}]
+      replacement: {ast: [{ token: "if-then-else"}, { token: "$a" }, { token: "$b" }, { token: "$c"}]}
     }
   ];
 
@@ -112,7 +112,7 @@ describe("postfix notations", function () {
     { pattern: ["$a", "!"],
       level: "8",
       associativity: leftAssoc,
-      replacement: [{ token: "!"}, { token: "$a"}]
+      replacement: {ast: [{ token: "!"}, { token: "$a"}] }
     }
   ];
 
@@ -135,7 +135,7 @@ describe("outfix notations", function () {
     { pattern: ["(","$a",")"],
       level: "9999",
       associativity: {},
-      replacement: [{ token: "$a"}]
+      replacement: {ast: [{ token: "$a"}]}
     }
   ];
   var astEq = mkAstEq(notations);
@@ -156,52 +156,52 @@ describe("infix notations", function () {
     { pattern: ["$a","+","$b"],
       level: "6",
       associativity: leftAssoc,
-      replacement: [{ token: "+" }, { token: "$a" }, { token: "$b"}]
+      replacement: {ast: [{ token: "+" }, { token: "$a" }, { token: "$b"}] }
     },
     { pattern: ["$a","-","$b"],
       level: "6",
       associativity: leftAssoc,
-      replacement: [{ token: "-" }, { token: "$a" }, { token: "$b"}]
+      replacement: {ast:[{ token: "-" }, { token: "$a" }, { token: "$b"}] }
     },
     { pattern: ["$a", "*", "$b"],
       level: "7",
       associativity: leftAssoc,
-      replacement: [{ token: "*" }, { token: "$a" }, { token: "$b"}]
+      replacement: {ast: [{ token: "*" }, { token: "$a" }, { token: "$b"}]}
     },
     { pattern: ["$a", "/", "$b"],
       level: "7",
       associativity: leftAssoc,
-      replacement: [{ token: "/" }, { token: "$a" }, { token: "$b"}]
+      replacement: {ast: [{ token: "/" }, { token: "$a" }, { token: "$b"}]}
     },
     { pattern: ["$a", "=", "$b"],
       level: "4",
       associativity: {},
-      replacement: [{ token: "=" }, { token: "$a" }, { token: "$b"}]
+      replacement: {ast: [{ token: "=" }, { token: "$a" }, { token: "$b"}]}
     },
     { pattern: ["$a", "?", "$b", ":", "$c"],
       level: "1",
       associativity: rightAssoc,
-      replacement: [{ token: "?:" }, { token: "$a" }, { token: "$b"}, { token: "$c" }]
+      replacement: {ast: [{ token: "?:" }, { token: "$a" }, { token: "$b"}, { token: "$c" }]}
     },
     { pattern: ["$a", "and", "$b"],
       level: "3",
       associativity: rightAssoc,
-      replacement: [{ token: "and" }, { token: "$a" }, { token: "$b"}]
+      replacement: {ast: [{ token: "and" }, { token: "$a" }, { token: "$b"}]}
     },
     { pattern: ["$a", "or", "$b"],
       level: "2",
       associativity: rightAssoc,
-      replacement: [{ token: "or" }, { token: "$a" }, { token: "$b"}]
+      replacement: {ast: [{ token: "or" }, { token: "$a" }, { token: "$b"}]}
     },
     { pattern: ["$a", ".", "$b"],
       level: "99",
       associativity: leftAssoc,
-      replacement: [{ token: "." }, { token: "$a" }, { token: "$b"}]
+      replacement: {ast: [{ token: "." }, { token: "$a" }, { token: "$b"}]}
     },
     { pattern: ["$a", "$b"],
       level: "9",
       associativity: leftAssoc,
-      replacement: [{ token: "$a" }, { token: "$b"}]
+      replacement: {ast: [{ token: "$a" }, { token: "$b"}]}
     }
   ];
   var astEq = mkAstEq(notations);
@@ -295,72 +295,72 @@ describe("complex notations", function () {
     { pattern: ["~", "$a"],
       level: "35",
       associativity: rightAssoc,
-      replacement: [{ token: "~"}, { token: "$a"}]
+      replacement: {ast: [{ token: "~"}, { token: "$a"}] }
     },
     { pattern: ["if", "$a", "then", "$b", "else", "$c"],
       level: "05",
       associativity: rightAssoc,
-      replacement: [{ token: "if-then-else"}, { token: "$a" }, { token: "$b" }, { token: "$c"}]
+      replacement: {ast: [{ token: "if-then-else"}, { token: "$a" }, { token: "$b" }, { token: "$c"}] }
     },
     { pattern: ["$a", "!"],
       level: "8",
       associativity: leftAssoc,
-      replacement: [{ token: "!"}, { token: "$a"}]
+      replacement: {ast: [{ token: "!"}, { token: "$a"}] }
     },
     { pattern: ["(","$a",")"],
       level: "0",
       associativity: {},
-      replacement: [{ token: "$a"}]
+      replacement: {ast: [{ token: "$a"}]}
     },
     { pattern: ["$a","+","$b"],
       level: "6",
       associativity: leftAssoc,
-      replacement: [{ token: "+" }, { token: "$a" }, { token: "$b"}]
+      replacement: {ast: [{ token: "+" }, { token: "$a" }, { token: "$b"}]}
     },
     { pattern: ["$a","-","$b"],
       level: "6",
       associativity: leftAssoc,
-      replacement: [{ token: "-" }, { token: "$a" }, { token: "$b"}]
+      replacement: {ast: [{ token: "-" }, { token: "$a" }, { token: "$b"}]}
     },
     { pattern: ["$a", "*", "$b"],
       level: "7",
       associativity: leftAssoc,
-      replacement: [{ token: "*" }, { token: "$a" }, { token: "$b"}]
+      replacement: {ast: [{ token: "*" }, { token: "$a" }, { token: "$b"}]}
     },
     { pattern: ["$a", "/", "$b"],
       level: "7",
       associativity: leftAssoc,
-      replacement: [{ token: "/" }, { token: "$a" }, { token: "$b"}]
+      replacement: {ast: [{ token: "/" }, { token: "$a" }, { token: "$b"}]}
     },
     { pattern: ["$a", "=", "$b"],
       level: "4",
       associativity: {},
-      replacement: [{ token: "=" }, { token: "$a" }, { token: "$b"}]
+      replacement: {ast:[{ token: "=" }, { token: "$a" }, { token: "$b"}]}
     },
     { pattern: ["$a", "?", "$b", ":", "$c"],
       level: "1",
       associativity: rightAssoc,
-      replacement: [{ token: "?:" }, { token: "$a" }, { token: "$b"}, { token: "$c" }]
+      replacement: {ast:[{ token: "?:" }, { token: "$a" }, { token: "$b"}, { token: "$c" }]}
     },
     { pattern: ["$a", "and", "$b"],
       level: "3",
       associativity: rightAssoc,
-      replacement: [{ token: "and" }, { token: "$a" }, { token: "$b"}]
+      replacement: {ast: [{ token: "and" }, { token: "$a" }, { token: "$b"}]}
     },
     { pattern: ["$a", "or", "$b"],
       level: "2",
       associativity: rightAssoc,
-      replacement: [{ token: "or" }, { token: "$a" }, { token: "$b"}]
+      replacement: {ast: [{ token: "or" }, { token: "$a" }, { token: "$b"}]}
     },
     { pattern: ["$a", ".", "$b"],
       level: "99",
       associativity: leftAssoc,
-      replacement: [{ token: "." }, { token: "$a" }, { token: "$b"}]
+      replacement: {ast: [{ token: "." }, { token: "$a" }, { token: "$b"}]}
     },
     { pattern: ["$a", "$b"],
       level: "9",
       associativity: leftAssoc,
-      replacement: [{ token: "$a" }, { token: "$b"}]
+      replacement: {ast: [{ token: "$a" }, { token: "$b"}]}
     }
   ];
   var astEq = mkAstEq(notations);
