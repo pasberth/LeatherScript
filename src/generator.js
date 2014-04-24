@@ -23,8 +23,16 @@ function generate(ast) {
           expressions: [x, y]
         };
       }
-    }  else if (ast.ast.length > 1) {
-      console.log(ast.ast[1]);
+    } else if (ast.ast[0].token === "@ASSIGN") {
+      var ast1 = generate(ast.ast[1]);
+      var ast2 = generate(ast.ast[2]);
+      return {
+        type: "BinaryExpression",
+        operator: "=",
+        left: ast1,
+        right: ast2
+      };
+    } else if (ast.ast.length > 1) {
       var ast1 = generate(ast.ast[0]);
       var ast2 = generate(ast.ast[1]);
       return {
