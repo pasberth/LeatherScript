@@ -13,6 +13,9 @@ Syntax "$a; $b" := "@SEQUENCE $a $b",
 Syntax "$a : $b" := "@ASCRIBE $a $b",
        level 0010, no associativity;
 
+Syntax "$a := $b" := "@ASSIGN $a $b",
+       level 0010, no associativity;
+
 Syntax "$a -> $b" := "@ARROW $a $b",
        level 0020, right associativity;
 
