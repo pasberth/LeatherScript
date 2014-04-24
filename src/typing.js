@@ -47,6 +47,13 @@ function typing(ast, env) {
                            val: { forall: "'a" }}},
                        Got: ast.ast[1].type } };
       }
+    } else if (ast.ast[0].token === "@VARIANT") {
+      typing(ast.ast[2], env);
+      if (!ast.ast[2].type || ast.ast[2].type.TypeError) {
+        return;
+      }
+      var tag = ast.ast[1].token;
+      ast.type = { variant: { tag: tag, val: ast.ast[2].type }}
     } else if (ast.ast[0].token === "@SEQUENCE") {
       typing(ast.ast[1], env);
       typing(ast.ast[2], env);
