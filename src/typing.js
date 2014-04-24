@@ -1,16 +1,16 @@
 function typePP(type) {
   if (type.simple) {
-    return type.simple
+    return type.simple;
   } else if (type.variant) {
-    return "(" + type.variant.tag + " of " + typePP(type.variant.val) + ")"
+    return "(" + type.variant.tag + " of " + typePP(type.variant.val) + ")";
   } else if (type.arrow) {
-    return "(" + typePP(type.arrow[0]) + " -> " + typePP(type.arrow[1]) + ")" 
+    return "(" + typePP(type.arrow[0]) + " -> " + typePP(type.arrow[1]) + ")" ;
   } else if (type.forall) {
     return type.forall;
   } else if (type.upair) {
-    return "(" + typePP(type.upair[0]) + " & " + typePP(type.upair[1]) + ")"
+    return "(" + typePP(type.upair[0]) + " & " + typePP(type.upair[1]) + ")";
   } else if (type.pair) {
-    return "(" + typePP(type.pair[0]) + " , " + typePP(type.pair[1]) + ")"
+    return "(" + typePP(type.pair[0]) + " , " + typePP(type.pair[1]) + ")";
   }
 }
 
@@ -20,7 +20,7 @@ function mkType(ast) {
       return { simple: ast.ast[1].token };
     } else if (ast.ast[0].token === "@VARIANT") {
       var y = mkType(ast.ast[2]);
-      return { variant: { tag: ast.ast[1].token, val: y }}
+      return { variant: { tag: ast.ast[1].token, val: y }};
     } else if (ast.ast[0].token === "@ARROW") {
       var x = mkType(ast.ast[1]);
       var y = mkType(ast.ast[2]);
@@ -89,9 +89,9 @@ function typing(ast, env) {
       }
       var expected = { variant:
                          { tag: ast.ast[2].token,
-                           val: { forall: "'a" }}}
+                           val: { forall: "'a" }}};
       if (upairIncludeTy(expected, ast.ast[1].type)) {
-        ast.type = upairToObj(ast.ast[1].type)[ast.ast[2].token].val;
+        ast.type = upairToObj(ast.ast[1].type)[ast.ast[2].token];
       } else {
         ast.type = { TypeError:
                      { Expected:
@@ -104,14 +104,28 @@ function typing(ast, env) {
         return;
       }
       var tag = ast.ast[1].token;
-      ast.type = { variant: { tag: tag, val: ast.ast[2].type }}
+      ast.type = { variant: { tag: tag, val: ast.ast[2].type }};
     } else if (ast.ast[0].token === "@ORDERED-PAIR") {
       typing(ast.ast[1], env);
       typing(ast.ast[2], env);
       if (!ast.ast[1].type || !ast.ast[2].type || ast.ast[1].type.TypeError || ast.ast[2].type.TypeError) {
         return;
       }
-      ast.type = { pair: [ast.ast[1].type, ast.ast[2].type] }
+      ast.type = { pair: [ast.ast[1].type, ast.ast[2].type] };
+    } else if (ast.ast[0].token === "@ASSIGN") {
+      typing(ast.ast[1], env);
+      typing(ast.ast[2], env);
+      if (!ast.ast[1].type || !ast.ast[2].type || ast.ast[1].type.TypeError || ast.ast[2].type.TypeError) {
+        return;
+      }
+      if (includeTy(ast.ast[1].type, ast.ast[2].type)) {
+        ast.type = { simple: "unit" };
+      } else {
+        ast.type = { TypeError:
+                     { Expected: ast.ast[1].type,
+                       Got: ast.ast[2].type }
+                   };
+      }
     } else if (ast.ast[0].token === "@SEQUENCE") {
       typing(ast.ast[1], env);
       typing(ast.ast[2], env);
@@ -125,7 +139,7 @@ function typing(ast, env) {
           { Expected: { simple: "unit" },
             Got: ast.ast[1].type
           }
-        }
+        };
       }
     } else if (ast.ast[0].token === "@ASCRIBE") {
       env[ast.ast[1].token] = mkType(ast.ast[2]);
