@@ -21,18 +21,19 @@ function generate(ast) {
         return {
           type: "SequenceExpression",
           expressions: [x, y]
-        }
-      }
-    } else {
-      return ast.ast.map(function (ast1) {
-        return generate(ast1);
-      }).reduce(function (ast1, ast2) {
-        return {
-          type: "CallExpression",
-          callee: ast1,
-          arguments: [ast2]
         };
-      });
+      }
+    } else if (ast.ast.length > 2) {
+      console.log(ast.ast[2]);
+      var ast1 = generate(ast.ast[1]);
+      var ast2 = generate(ast.ast[2]);
+      return {
+        type: "CallExpression",
+        callee: ast1,
+        arguments: [ast2]
+      };
+    } else {
+      return generate(ast.ast[0]);
     }
   } else if (ast.token) {
     if (ast.token[0] === '"') {
