@@ -360,7 +360,7 @@ function typing(ast, env) {
     else if (ast.token[0] === '1' || ast.token[0] === '2' || ast.token[0] === '3'
             || ast.token[0] === '4' || ast.token[0] === '5' || ast.token[0] === '6'
             || ast.token[0] === '7' || ast.token[0] === '8' || ast.token[0] === '9') {
-      ast.type = { simple: "int" };
+      ast.type = { simple: "number" };
     }
     else if (env[ast.token]) {
       ast.type = env[ast.token];

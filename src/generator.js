@@ -329,7 +329,7 @@ function generate(ast) {
               ast.token[0] === '9') {
       return {
         type: "Literal",
-        value: parseInt(ast.token[0])
+        value: parseFloat(ast.token[0])
       };
     }
     else {
