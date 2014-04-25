@@ -53,6 +53,8 @@ function includeTy(ty1, ty2) {
     return includeTy(ty1.variant.val, ty2.variant.val);
   } else if (ty1.pair && ty2.pair) {
     return includeTy(ty1.pair[0], ty2.pair[0]) && includeTy(ty1.pair[1], ty2.pair[1]);
+  } else if (ty1.arrow && ty2.arrow) {
+    return includeTy(ty1.arrow[0], ty2.arrow[0]) && includeTy(ty2.arrow[1], ty1.arrow[1]);
   } else if (ty1.forall) {
     return true;
   } else if (ty2.mutable) {
@@ -83,6 +85,22 @@ function upairToObj(ty, obj) {
   } else if (ty.variant) {
     obj[ty.variant.tag] = ty.variant.val;
     return obj;
+  }
+}
+
+function declParams(ast, env) {
+  if (ast.ast && ast.ast[0].token === "@ORDERED-PAIR") {
+    x = declParams(ast.ast[1], env);
+    y = declParams(ast.ast[2], env);
+    return { pair: [x, y] };
+  } else if (ast.ast && ast.ast[0].token === "@ASCRIBE") {
+    env[ast.ast[1].token] = mkType(ast.ast[2]);
+    return mkType(ast.ast[2]);
+  } else if (ast.ast) {
+    return declParams(ast.ast[0], env);
+  }
+  else {
+    throw "an error occurred";
   }
 }
 
@@ -156,13 +174,31 @@ function typing(ast, env) {
       }
     } else if (ast.ast[0].token === "@ASCRIBE") {
       env[ast.ast[1].token] = mkType(ast.ast[2]);
+    } else if (ast.ast[0].token === "@ARROW") {
+      ty = declParams(ast.ast[1], env);
+      typing(ast.ast[2], env);
+      if (!ast.ast[2].type || ast.ast[2].type.TypeError) {
+        return;
+      }
+      ast.type = { arrow: [ty, ast.ast[2].type] };
     } else if (ast.ast.length > 1) {
       typing(ast.ast[0], env);
       typing(ast.ast[1], env);
       if (!ast.ast[0].type || !ast.ast[1].type || ast.ast[0].type.TypeError || ast.ast[1].type.TypeError) {
         return;
       }
-      if (ast.ast[0].type.arrow) {
+      if (ast.ast[0].type.mutable && ast.ast[0].type.mutable.arrow) {
+         if (includeTy(ast.ast[0].type.mutable.arrow[0], ast.ast[1].type)) {
+           ast.type = ast.ast[0].type.mutable.arrow[1];
+         } else {
+           ast.type = { TypeError:
+                        { Expected: ast.ast[0].type.mutable.arrow[0],
+                          Got: ast.ast[1].type
+                        }
+                      };
+         }
+      }
+      else if (ast.ast[0].type.arrow) {
          if (includeTy(ast.ast[0].type.arrow[0], ast.ast[1].type)) {
            ast.type = ast.ast[0].type.arrow[1];
          } else {
