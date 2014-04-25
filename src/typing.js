@@ -13,6 +13,10 @@ function typePP(type) {
     return "(" + typePP(type.upair[0]) + " & " + typePP(type.upair[1]) + ")";
   } else if (type.pair) {
     return "(" + typePP(type.pair[0]) + " , " + typePP(type.pair[1]) + ")";
+  } else if (type.recursive) {
+    return typePP(type.recursive[1]) + " as " + type.recursive[0];
+  } else if (type.variable) {
+    return type.variable;
   }
 }
 
@@ -37,12 +41,36 @@ function mkType(ast) {
       var x = mkType(ast.ast[1]);
       var y = mkType(ast.ast[2]);
       return { pair: [x, y] };
+    } else if (ast.ast[0].token === "@RECURSIVE") {
+      return { recursive: [ast.ast[1].token, mkType(ast.ast[2])] };
     } else {
       return mkType(ast.ast[0]);
     }
 
   } else {
-    throw "an error occurred";
+    return { variable: ast.token };
+  }
+}
+
+function lenOfTy(ty) {
+  if (ty.simple) {
+    return 1;
+  } else if (ty.variant) {
+    return lenOfTy(ty.val);
+  } else if (ty.pair) {
+    return lenOfTy(ty.pair[0]) + lenOfTy(ty.pair[1]);
+  } else if (ty.upair) {
+    return lenOfTy(ty.upair[0]) + lenOfTy(ty.upair[1]);
+  } else if (ty.arrow) {
+    return lenOfTy(ty.arrow[0]) + lenOfTy(ty.arrow[1]);
+  } else if (ty.mutable) {
+    return lenOfTy(ty.mutable);
+  } else if (ty.recursive) {
+    return lenOfTy(ty.recursive[1]);
+  } else if (ty.variable) {
+    return 1;
+  } else {
+    return 0;
   }
 }
 
@@ -54,13 +82,44 @@ function includeTy(ty1, ty2) {
   } else if (ty1.pair && ty2.pair) {
     return includeTy(ty1.pair[0], ty2.pair[0]) && includeTy(ty1.pair[1], ty2.pair[1]);
   } else if (ty1.arrow && ty2.arrow) {
-    return includeTy(ty1.arrow[0], ty2.arrow[0]) && includeTy(ty2.arrow[1], ty1.arrow[1]);
+    return includeTy(ty1.arrow[0], ty2.arrow[0]) && includeTy(ty1.arrow[1], ty2.arrow[1]);
   } else if (ty1.forall) {
     return true;
   } else if (ty2.mutable) {
     return includeTy(ty1, ty2.mutable);
+  } else if (ty1.recursive && ty2.recursive) {
+    var ty3 = { recursive: [ty2.recursive[0], subst(ty1.recursive[0], { variable: ty2.recursive[0] }, ty1.recursive[1]) ]};
+    return includeTy(ty3.recursive[1], ty2.recursive[1]);
+  } else if (ty1.recursive) {
+    var ty3 = subst(ty1.recursive[0], ty1, ty1.recursive[1]);
+
+    if (lenOfTy(ty3) > lenOfTy(ty2)) {
+      return false;
+    } else {
+      return includeTy(ty3, ty2);
+    }
+  } else if (ty1.variable && ty2.variable) {
+    return ty1.variable === ty2.variable;
   } else {
     return false;
+  }
+}
+
+function subst(variable, replacement, type) {
+  if (type.variable) {
+    if (variable === type.variable) {
+      return replacement;
+    } else {
+      return type;
+    }
+  } else if (type.arrow) {
+    return { arrow: [subst(variable, replacement, type.arrow[0]), subst(variable, replacement, type.arrow[1])] };
+  } else if (type.pair) {
+    return { pair: [subst(variable, replacement, type.pair[0]), subst(variable, replacement, type.pair[1])] };
+  } else if (type.upair) {
+    return { upair: [subst(variable, replacement, type.upair[0]), subst(variable, replacement, type.upair[1])] };
+  } else {
+    return type;
   }
 }
 

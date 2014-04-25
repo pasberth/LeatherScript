@@ -16,6 +16,12 @@ Syntax "$a : $b" := "@ASCRIBE $a $b",
 Syntax "$a := $b" := "@ASSIGN $a $b",
        level 0010, no associativity;
 
+Syntax "mutable $a" := "@MUTABLE $a",
+       level 0012, no associativity;
+
+Syntax "$a as $b" := "@RECURSIVE $b $a",
+       level 0015, no associativity;
+
 Syntax "$a -> $b" := "@ARROW $a $b",
        level 0020, right associativity;
 
@@ -29,9 +35,6 @@ Syntax "$a of $b" := "@VARIANT $a $b",
        level 0060, right associativity;
 
 Syntax "simple $a" := "@SIMPLE $a",
-       level 0090, right associativity;
-
-Syntax "mutable $a" := "@MUTABLE $a",
        level 0090, right associativity;
 
 Syntax "$a $b" := "$a $b",
