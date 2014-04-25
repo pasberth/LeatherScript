@@ -91,10 +91,50 @@ function generatePairs(ast) {
   }
 }
 
+function mkTest(ast, it) {
+  if (ast.ast && ast.ast[0].token === "@ORDERED-PAIR") {
+    var l = mkTest(ast.ast[1], { type: "MemberExpression", computed: true, object: it, property: { type: "Literal", value: 0 }});
+    var r = mkTest(ast.ast[2], { type: "MemberExpression", computed: true, object: it, property: { type: "Literal", value: 0 }});
+    return {
+      type: "BinaryExpression",
+      operator: "&&",
+      left: l,
+      right: r
+    };
+  } else if (ast.ast && ast.ast[0].token === "@VARIANT") {
+    return {
+      type: "MemberExpression",
+      object: it,
+      property: {
+        type: "Identifier",
+        name: ast.ast[1].token
+      }
+    };
+  } else if (ast.ast && ast.ast[0].token === "@ASCRIBE") {
+    return mkTest(ast.ast[1], it);
+  } else if (ast.ast) {
+    return mkTest(ast.ast[0], it);
+  } else if (ast.token) {
+    return { type: "Identifier", name: ast.token };
+  } else {
+    throw "an error occurred";
+  }
+}
+
+function takeParams(ast) {
+  if (ast.ast && ast.ast[0].token === "@ORDERED-PAIR") {
+    var l = ast.ast[1];
+    var r = takeParams(ast.ast[2]);
+    return [l].concat(r);
+  } else {
+    return [ast];
+  }
+}
+
 function generateParams(ast) {
   if (ast.ast && ast.ast[0].token === "@ORDERED-PAIR") {
     var l = generate(ast.ast[1]);
-    var r = generatePairs(ast.ast[2]);
+    var r = generateParams(ast.ast[2]);
     return [l].concat(r);
   } else {
     return [generate(ast)];
@@ -164,17 +204,31 @@ function generate(ast) {
         ]
       };
     } else if (ast.ast[0].token === "@ARROW") {
+      var params = takeParams(ast.ast[1]);
       var ast1 = generateParams(ast.ast[1]);
+      var tests = ast1.map(function (param, index) { return mkTest(params[index], param) });
       var ast2 = generate(ast.ast[2]);
       return {
         type: "FunctionExpression",
         params: ast1,
         body: {
           type: "BlockStatement"
-          , body: [{
-            type: "ReturnStatement",
-            argument: ast2
-          }]
+          , body: [
+            { type: "IfStatement",
+              test: esprima.parse('arguments.length !=' + pairCount(ast.ast[1])).body[0].expression,
+              consequent: esprima.parse('throw new NonExhaustivePatterns("wrong number of arguments(" + arguments.length + " for " + ' + pairCount(ast.ast[1]) + ' + ")")').body[0]
+            }].concat(
+              tests.map(function (test) {
+                return {
+                  type: "IfStatement",
+                  test: { type: "UnaryExpression", operator: "!", argument: test },
+                  consequent: esprima.parse('throw new NonExhaustivePatterns("Non-exhaustive patterns in lambda")').body[0]
+                };
+              })).concat([
+            {
+              type: "ReturnStatement",
+              argument: ast2
+            }])
         }
       };
     } else if (ast.ast.length > 1) {
