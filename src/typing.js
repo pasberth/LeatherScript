@@ -56,7 +56,7 @@ function lenOfTy(ty) {
   if (ty.simple) {
     return 1;
   } else if (ty.variant) {
-    return lenOfTy(ty.val);
+    return lenOfTy(ty.variant.val);
   } else if (ty.pair) {
     return lenOfTy(ty.pair[0]) + lenOfTy(ty.pair[1]);
   } else if (ty.upair) {
@@ -81,6 +81,8 @@ function includeTy(ty1, ty2) {
     return includeTy(ty1.variant.val, ty2.variant.val);
   } else if (ty1.pair && ty2.pair) {
     return includeTy(ty1.pair[0], ty2.pair[0]) && includeTy(ty1.pair[1], ty2.pair[1]);
+  } else if (ty1.upair && ty2.upair) {
+    return includeTy(ty1.upair[0], ty2.upair[0]) && includeTy(ty1.upair[1], ty2.upair[1]);
   } else if (ty1.arrow && ty2.arrow) {
     return includeTy(ty1.arrow[0], ty2.arrow[0]) && includeTy(ty1.arrow[1], ty2.arrow[1]);
   } else if (ty1.forall) {
@@ -118,6 +120,10 @@ function subst(variable, replacement, type) {
     return { pair: [subst(variable, replacement, type.pair[0]), subst(variable, replacement, type.pair[1])] };
   } else if (type.upair) {
     return { upair: [subst(variable, replacement, type.upair[0]), subst(variable, replacement, type.upair[1])] };
+  } else if (type.variant) {
+    return { variant: { tag: type.variant.tag, val: subst(variable, replacement, type.variant.val) } };
+  } else if (type.mutable) {
+    return { mutable: subst(variable, replacement, type.mutable) };
   } else {
     return type;
   }

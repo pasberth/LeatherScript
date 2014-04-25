@@ -1,2 +1,8 @@
 f : mutable simple string -> 'a as 'a;
-f := (x : simple string) -> f
+f := (x : simple string) -> f;
+
+xs : mutable simple string, 'a as 'a;
+xs := "a", xs;
+
+ast : mutable x of simple string & ast of 'a as 'a;
+ast := x of "abc" & ast of ast
