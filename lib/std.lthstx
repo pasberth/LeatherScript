@@ -53,4 +53,16 @@ Syntax "$a $b" := "$a $b",
        level 8500, left associativity;
 
 Syntax "$a.$b" := "@MEMBER $a $b",
-       level 9000, left associativity
+       level 9000, left associativity;
+
+Notation "$a + $b" := "addition($a, $b)",
+       level 6, left associativity;
+
+Notation "$a - $b" := "subtraction($a, $b)",
+       level 6, left associativity;
+
+Notation "$a * $b" := "multiplication($a, $b)",
+       level 6, left associativity;
+
+Notation "$a / $b" := "division($a, $b)",
+       level 6, left associativity
