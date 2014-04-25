@@ -1,6 +1,63 @@
 var esprima = require("esprima");
 var escodegen = require("escodegen");
 
+function isObj(type) {
+  if (type.variant) {
+    return true;
+  } else if (type.upair && isObj(type.upair[0]) && isObj(type.upair[1])) {
+    return true;
+  } else {
+    return false;
+  }
+}
+
+function keys(type) {
+  if (type.variant) {
+    return [type.variant.tag];
+  } else if (type.upair) {
+    return keys(type.upair[0]).concat(keys(type.upair[1]));
+  } else {
+    return [];
+  }
+}
+
+function generateUPair(ast) {
+  if (ast.ast && ast.ast[0].token === "@UNORDERED-PAIR") {
+    if (isObj(ast.ast[1].type) && isObj(ast.ast[2].type)) {
+      var x = generateUPair(ast.ast[1]);
+      var y = generateUPair(ast.ast[2]);
+      console.log(ast.ast[1].type);
+      var k1 = keys(ast.ast[1].type);
+      var k2 = keys(ast.ast[2].type); 
+     var ret = { type: "ObjectExpression", properties: [] };
+      for (var i = 0; i < k1.length; ++i ){
+        ret.properties.push({
+          key: { type: "Identifier", name: k1[i] },
+          value: { "type": "MemberExpression", object: x, property: { type: "Identifier", name: k1[i] }},
+          kind: "init"
+        });
+      }
+      for (var i = 0; i < k2.length; ++i ){
+        ret.properties.push({
+          key: { type: "Identifier", name: k2[i]},
+          value: { "type": "MemberExpression", object: y, property: { type: "Identifier", name: k2[i] }},
+          kind: "init"
+        });
+      }
+      return ret;
+    } else {
+      var x = generateUPair(ast.ast[1]);
+      var y = generateUPair(ast.ast[2]);
+      return {
+        type: "ArrayExpression",
+        elements: [x, y]
+      };
+    }
+  } else {
+    return generate(ast);
+  }
+}
+
 function generatePairs(ast) {
   if (ast.ast && ast.ast[0].token === "@ORDERED-PAIR") {
     var l = generate(ast.ast[1]);
@@ -72,6 +129,8 @@ function generate(ast) {
           type: "ArrayExpression",
           elements: [x, y]
         };
+    } else if (ast.ast[0].token === "@UNORDERED-PAIR") {
+      return generateUPair(ast);
     } else if (ast.ast[0].token === "@ASSIGN") {
       var ast1 = generate(ast.ast[1]);
       var ast2 = generate(ast.ast[2]);

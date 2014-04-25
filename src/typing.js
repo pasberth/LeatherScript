@@ -136,6 +136,13 @@ function typing(ast, env) {
         return;
       }
       ast.type = { pair: [ast.ast[1].type, ast.ast[2].type] };
+    } else if (ast.ast[0].token === "@UNORDERED-PAIR") {
+      typing(ast.ast[1], env);
+      typing(ast.ast[2], env);
+      if (!ast.ast[1].type || !ast.ast[2].type || ast.ast[1].type.TypeError || ast.ast[2].type.TypeError) {
+        return;
+      }
+      ast.type = { upair: [ast.ast[1].type, ast.ast[2].type] };
     } else if (ast.ast[0].token === "@ASSIGN") {
       typing(ast.ast[1], env);
       typing(ast.ast[2], env);
