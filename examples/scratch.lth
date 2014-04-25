@@ -1,0 +1,2 @@
+x : mutable simple int;
+x := "this is wrong, so you will see a type error."
