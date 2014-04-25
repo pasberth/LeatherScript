@@ -1,0 +1,2 @@
+f : mutable simple string -> 'a as 'a;
+f := (x : simple string) -> f
