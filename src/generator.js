@@ -6,16 +6,40 @@ function generatePairs(ast) {
     var l = generate(ast.ast[1]);
     var r = generatePairs(ast.ast[2]);
     return [l].concat(r);
+  } else if (ast.type && ast.type.pair) {   
+    var pair = generate(ast);
+    var ret = [];
+    var cnt = pairCount(ast.type);
+    for (var i = 0; i < cnt; ++i) {
+      ret.push({ type: "MemberExpression",
+        object: pair,
+        property: { type: "Literal", value: i },
+        computed: true
+      });
+    }
+    return ret;
+  } else if (ast.type && ast.type.mutable && ast.type.mutable.pair) {
+    var pair = generate(ast);
+    var ret = [];
+    var cnt = pairCount(ast.type.mutable);
+    for (var i = 0; i < cnt; ++i) {
+      ret.push({ type: "MemberExpression",
+        object: pair,
+        property: { type: "Literal", value: i },
+        computed: true
+      });
+    }
+    return ret;
   } else {
     return [generate(ast)];
   }
 }
 
-function pairCount(ast) {
-  if (ast.ast && ast.ast[0].token === "@ORDERED-PAIR") {
-    return 1 + pairCount(ast.ast[2]);
+function pairCount(type) {
+  if (type.pair) {
+    return 1 + pairCount(type.pair[1]);
   } else {
-    return 0;
+    return 1;
   }
 }
 
@@ -41,6 +65,13 @@ function generate(ast) {
           expressions: [x, y]
         };
       }
+    } else if (ast.ast[0].token === "@ORDERED-PAIR") {
+        var x = generate(ast.ast[1]);
+        var y = generate(ast.ast[2]);
+        return {
+          type: "ArrayExpression",
+          elements: [x, y]
+        };
     } else if (ast.ast[0].token === "@ASSIGN") {
       var ast1 = generate(ast.ast[1]);
       var ast2 = generate(ast.ast[2]);
