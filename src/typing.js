@@ -130,6 +130,8 @@ function subst(variable, replacement, type) {
     return { pair: [subst(variable, replacement, type.pair[0]), subst(variable, replacement, type.pair[1])] };
   } else if (type.upair) {
     return { upair: [subst(variable, replacement, type.upair[0]), subst(variable, replacement, type.upair[1])] };
+  } else if (type.either) {
+    return { either: [subst(variable, replacement, type.either[0]), subst(variable, replacement, type.either[1])] };
   } else if (type.variant) {
     return { variant: { tag: type.variant.tag, val: subst(variable, replacement, type.variant.val) } };
   } else if (type.mutable) {
