@@ -1,6 +1,8 @@
 function typePP(type) {
   if (type.simple) {
     return type.simple;
+  } else if (type.mutable) {
+    return "mutable " + typePP(type.mutable);
   } else if (type.variant) {
     return "(" + type.variant.tag + " of " + typePP(type.variant.val) + ")";
   } else if (type.arrow) {
@@ -18,6 +20,8 @@ function mkType(ast) {
   if (ast.ast) {
     if (ast.ast[0].token === "@SIMPLE") {
       return { simple: ast.ast[1].token };
+    } else if (ast.ast[0].token === "@MUTABLE") {
+      return { mutable: mkType(ast.ast[1]) };
     } else if (ast.ast[0].token === "@VARIANT") {
       var y = mkType(ast.ast[2]);
       return { variant: { tag: ast.ast[1].token, val: y }};
@@ -51,6 +55,8 @@ function includeTy(ty1, ty2) {
     return includeTy(ty1.pair[0], ty2.pair[0]) && includeTy(ty1.pair[1], ty2.pair[1]);
   } else if (ty1.forall) {
     return true;
+  } else if (ty2.mutable) {
+    return includeTy(ty1, ty2.mutable);
   } else {
     console.log(ty1);
     console.log(ty2);
@@ -118,11 +124,18 @@ function typing(ast, env) {
       if (!ast.ast[1].type || !ast.ast[2].type || ast.ast[1].type.TypeError || ast.ast[2].type.TypeError) {
         return;
       }
-      if (includeTy(ast.ast[1].type, ast.ast[2].type)) {
+      if (! ast.ast[1].type.mutable) {
+        ast.type = { TypeError:
+                     { Expected: { mutable: { forall: "'a" }},
+                       Got: ast.ast[1].type }};
+        return;
+      }
+
+      if (includeTy(ast.ast[1].type.mutable, ast.ast[2].type)) {
         ast.type = { simple: "unit" };
       } else {
         ast.type = { TypeError:
-                     { Expected: ast.ast[1].type,
+                     { Expected: ast.ast[1].type.mutable,
                        Got: ast.ast[2].type }
                    };
       }

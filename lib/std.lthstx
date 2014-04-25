@@ -29,7 +29,10 @@ Syntax "$a of $b" := "@VARIANT $a $b",
        level 0060, right associativity;
 
 Syntax "simple $a" := "@SIMPLE $a",
-       level 0090, no associativity;
+       level 0090, right associativity;
+
+Syntax "mutable $a" := "@MUTABLE $a",
+       level 0090, right associativity;
 
 Syntax "$a $b" := "$a $b",
        level 8500, left associativity;
