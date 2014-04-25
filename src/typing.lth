@@ -1,3 +1,8 @@
+addition : (simple number, simple number) -> simple number;
+subtraction : (simple number, simple number) -> simple number;
+multiplication : (simple number, simple number) -> simple number;
+division : (simple number, simple number) -> simple number;
+
 typing
   : mutable (token of simple string
             & type of mutable (Simple of simple string))
@@ -10,7 +15,7 @@ begin
   match ast with
   case token of (tk : simple string) & type of (_ : mutable (Simple of simple string)) ->
     begin
-      ast.type := Simple of "abc"
+      ast.type := Simple of "string"
     end
   end
 end
