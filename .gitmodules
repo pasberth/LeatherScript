@@ -1,3 +1,6 @@
 [submodule "paradocs"]
 	path = paradocs
 	url = git@github.com:pasberth/paradocs.git
+[submodule "bootstrap"]
+	path = bootstrap
+	url = git@github.com:pasberth/LeatherScript.git
