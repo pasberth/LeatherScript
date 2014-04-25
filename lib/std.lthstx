@@ -31,6 +31,9 @@ Syntax "case $a" := "@CASE $a",
 Syntax "$a -> $b" := "@ARROW $a $b",
        level 0020, right associativity;
 
+Syntax "$a | $b" := "@EITHER $a $b",
+       level 0040, right associativity;
+
 Syntax "$a, $b" := "@ORDERED-PAIR $a $b",
        level 0050, right associativity;
 

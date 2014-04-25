@@ -13,6 +13,8 @@ function typePP(type) {
     return "(" + typePP(type.upair[0]) + " & " + typePP(type.upair[1]) + ")";
   } else if (type.pair) {
     return "(" + typePP(type.pair[0]) + " , " + typePP(type.pair[1]) + ")";
+  } else if (type.either) {
+    return "(" + typePP(type.either[0]) + " | " + typePP(type.either[1]) + ")";
   } else if (type.recursive) {
     return typePP(type.recursive[1]) + " as " + type.recursive[0];
   } else if (type.variable) {
@@ -41,6 +43,10 @@ function mkType(ast) {
       var x = mkType(ast.ast[1]);
       var y = mkType(ast.ast[2]);
       return { pair: [x, y] };
+    } else if (ast.ast[0].token === "@EITHER") {
+      var x = mkType(ast.ast[1]);
+      var y = mkType(ast.ast[2]);
+      return { either: [x, y] };
     } else if (ast.ast[0].token === "@RECURSIVE") {
       return { recursive: [ast.ast[1].token, mkType(ast.ast[2])] };
     } else {
@@ -61,6 +67,8 @@ function lenOfTy(ty) {
     return lenOfTy(ty.pair[0]) + lenOfTy(ty.pair[1]);
   } else if (ty.upair) {
     return lenOfTy(ty.upair[0]) + lenOfTy(ty.upair[1]);
+  } else if (ty.either) {
+    return lenOfTy(ty.either[0]) + lenOfTy(ty.either[1]);
   } else if (ty.arrow) {
     return lenOfTy(ty.arrow[0]) + lenOfTy(ty.arrow[1]);
   } else if (ty.mutable) {
@@ -83,6 +91,8 @@ function includeTy(ty1, ty2) {
     return includeTy(ty1.pair[0], ty2.pair[0]) && includeTy(ty1.pair[1], ty2.pair[1]);
   } else if (ty1.upair && ty2.upair) {
     return includeTy(ty1.upair[0], ty2.upair[0]) && includeTy(ty1.upair[1], ty2.upair[1]);
+  } else if (ty1.either) {
+    return includeTy(ty1.either[0], ty2) || includeTy(ty1.either[1], ty2);
   } else if (ty1.arrow && ty2.arrow) {
     return includeTy(ty1.arrow[0], ty2.arrow[0]) && includeTy(ty1.arrow[1], ty2.arrow[1]);
   } else if (ty1.forall) {
@@ -279,9 +289,14 @@ function typing(ast, env) {
       var expected = cases[0].type.arrow[1];
       for (var i = 0; i < cases.length; ++i) {
         var cs = cases[i];
-        if (!includeTy(cs.type.arrow[0], ast.ast[1].type) || !includeTy(expected, cs.type.arrow[1])) {
-          cs.type = { TypeError: { Expected: { arrow: [ast.ast[1].type, expected] }, Got: cs.type }};
+        if (!includeTy(expected, cs.type.arrow[1])) {
+          cs.type = { TypeError: { Expected: { arrow: [{forall: "'a"}, expected] }, Got: cs.type }};
           return;
+        }
+        if (ast.ast[1].type.mutable && includeTy(ast.ast[1].type.mutable, cs.type.arrow[0])) {
+        } else if (includeTy(ast.ast[1].type, cs.type.arrow[0])) {
+        } else {
+          cs.type = { TypeError: { Expected: ast.ast[1].type, Got: cs.type.arrow[0] }};
         }
       }
       ast.type = expected;
