@@ -107,7 +107,16 @@ function generatePairs(ast) {
 function mkTest(ast, it) {
   if (ast.ast && ast.ast[0].token === "@ORDERED-PAIR") {
     var l = mkTest(ast.ast[1], { type: "MemberExpression", computed: true, object: it, property: { type: "Literal", value: 0 }});
-    var r = mkTest(ast.ast[2], { type: "MemberExpression", computed: true, object: it, property: { type: "Literal", value: 0 }});
+    var r = mkTest(ast.ast[2], { type: "MemberExpression", computed: true, object: it, property: { type: "Literal", value: 1 }});
+    return {
+      type: "BinaryExpression",
+      operator: "&&",
+      left: l,
+      right: r
+    };
+  } else if (ast.ast && ast.ast[0].token === "@UNORDERED-PAIR") {
+    var l = mkTest(ast.ast[1], it);
+    var r = mkTest(ast.ast[2], it);
     return {
       type: "BinaryExpression",
       operator: "&&",
@@ -154,7 +163,7 @@ function takeParams(ast) {
     var r = takeParams(ast.ast[2]);
     return [l].concat(r);
   } else {
-    return [ast];
+      return [ast];
   }
 }
 
@@ -168,13 +177,15 @@ function generateParams(ast) {
       var r = generateParams(ast.ast[2]);
       return [{ "type": "Identifier", name: "x" + (pairCount(ast.ast[2]) + 1) }].concat(r);
     }
-  } else {
+  } else if (ast.ast.length === 1 || ast.token) {
     var l = generate(ast);
     if (l.type === "Identifier") {
       return [l];
     } else {
       return [{ "type": "Identifier", name: "x0" }];
     }
+  } else {
+      return [{ "type": "Identifier", name: "x0" }];
   }
 }
 

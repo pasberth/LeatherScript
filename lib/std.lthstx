@@ -7,6 +7,9 @@ Token ")";
 Syntax "($a)" := "$a",
         level 0, no associativity;
 
+Syntax "begin $a end" := "$a",
+        level 0, no associativity;
+
 Syntax "$a; $b" := "@SEQUENCE $a $b",
        level 0000, right associativity;
 

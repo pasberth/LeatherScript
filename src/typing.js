@@ -170,6 +170,10 @@ function declParams(ast, env) {
     var x = declParams(ast.ast[1], env);
     var y = declParams(ast.ast[2], env);
     return { pair: [x, y] };
+  } else if (ast.ast && ast.ast[0].token === "@UNORDERED-PAIR") {
+    var x = declParams(ast.ast[1], env);
+    var y = declParams(ast.ast[2], env);
+    return { upair: [x, y] };
   } else if (ast.ast && ast.ast[0].token === "@ASCRIBE") {
     env[ast.ast[1].token] = mkType(ast.ast[2]);
     return mkType(ast.ast[2]);
@@ -346,7 +350,7 @@ function typing(ast, env) {
                    };
       }
     } else {
-      typing(ast.ast[0]);
+      typing(ast.ast[0], env);
       ast.type = ast.ast[0].type;
     }
   } else if (ast.token) {
