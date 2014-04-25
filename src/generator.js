@@ -102,20 +102,34 @@ function mkTest(ast, it) {
       right: r
     };
   } else if (ast.ast && ast.ast[0].token === "@VARIANT") {
-    return {
+    return mkTest(ast.ast[2], {
       type: "MemberExpression",
       object: it,
       property: {
         type: "Identifier",
         name: ast.ast[1].token
       }
-    };
+    });
   } else if (ast.ast && ast.ast[0].token === "@ASCRIBE") {
     return mkTest(ast.ast[1], it);
   } else if (ast.ast) {
     return mkTest(ast.ast[0], it);
   } else if (ast.token) {
-    return { type: "Identifier", name: ast.token };
+    var x = generate(ast);
+    if (x.type === "Identifier") {
+      return {
+        type: "BinaryExpression",
+        operator: "=",
+        left: x,
+        right: it
+      };
+    } else {
+      return {
+        type: "BinaryExpression",
+        operator: "===",
+        left: it,
+        right: x };
+    }
   } else {
     throw "an error occurred";
   }
@@ -134,10 +148,20 @@ function takeParams(ast) {
 function generateParams(ast) {
   if (ast.ast && ast.ast[0].token === "@ORDERED-PAIR") {
     var l = generate(ast.ast[1]);
-    var r = generateParams(ast.ast[2]);
-    return [l].concat(r);
+    if (l.type === "Identifier") {
+      var r = generateParams(ast.ast[2]);
+      return [l].concat(r);
+    } else {
+      var r = generateParams(ast.ast[2]);
+      return [{ "type": "Identifier", name: "x" + (pairCount(ast.ast[2]) + 1) }].concat(r);
+    }
   } else {
-    return [generate(ast)];
+    var l = generate(ast);
+    if (l.type === "Identifier") {
+      return [l];
+    } else {
+      return [{ "type": "Identifier", name: "x0" }];
+    }
   }
 }
 
