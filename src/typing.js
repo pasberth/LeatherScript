@@ -153,14 +153,30 @@ function upairToObj(ty, obj) {
 
 function declParams(ast, env) {
   if (ast.ast && ast.ast[0].token === "@ORDERED-PAIR") {
-    x = declParams(ast.ast[1], env);
-    y = declParams(ast.ast[2], env);
+    var x = declParams(ast.ast[1], env);
+    var y = declParams(ast.ast[2], env);
     return { pair: [x, y] };
   } else if (ast.ast && ast.ast[0].token === "@ASCRIBE") {
     env[ast.ast[1].token] = mkType(ast.ast[2]);
     return mkType(ast.ast[2]);
+  } else if (ast.ast && ast.ast[0].token === "@VARIANT") {
+    var x = declParams(ast.ast[2], env);
+    return { variant: { tag: ast.ast[1].token, val: x }};
   } else if (ast.ast) {
     return declParams(ast.ast[0], env);
+  }
+  else {
+    throw "an error occurred";
+  }
+}
+
+function takeCases(ast) {
+  if (ast.ast[0].token === "@SEQUENCE") {
+    var asts1 = takeCases(ast.ast[1]);
+    var asts2 = takeCases(ast.ast[2]);
+    return asts1.concat(asts2);
+  } else if (ast.ast[0].token === "@CASE") {
+    return [ast.ast[1]];
   }
   else {
     throw "an error occurred";
@@ -244,8 +260,33 @@ function typing(ast, env) {
       }
     } else if (ast.ast[0].token === "@ASCRIBE") {
       env[ast.ast[1].token] = mkType(ast.ast[2]);
+    } else if (ast.ast[0].token === "@MATCH") {
+      typing(ast.ast[1], env);
+      var cases = takeCases(ast.ast[2]);
+      for (var i = 0; i < cases.length; ++i) {
+        var cs = cases[i];
+        typing(cs, env);
+      }
+      if (!ast.ast[1].type || ast.ast[1].type.TypeError) { return; }
+      for (var i = 0; i < cases.length; ++i) {
+        var cs = cases[i];
+        if (!cs.type || cs.type.TypeError) { return; }
+        if (!cs.type.arrow) {
+          cs.type = { TypeError: { Expected: { arrow: [ast.ast[1].type, {forall: "'a"}] }, Got: cs.type }};
+          return;
+        }
+      }
+      var expected = cases[0].type.arrow[1];
+      for (var i = 0; i < cases.length; ++i) {
+        var cs = cases[i];
+        if (!includeTy(cs.type.arrow[0], ast.ast[1].type) || !includeTy(expected, cs.type.arrow[1])) {
+          cs.type = { TypeError: { Expected: { arrow: [ast.ast[1].type, expected] }, Got: cs.type }};
+          return;
+        }
+      }
+      ast.type = expected;
     } else if (ast.ast[0].token === "@ARROW") {
-      ty = declParams(ast.ast[1], env);
+      var ty = declParams(ast.ast[1], env);
       typing(ast.ast[2], env);
       if (!ast.ast[2].type || ast.ast[2].type.TypeError) {
         return;

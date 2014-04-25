@@ -1,0 +1,6 @@
+x : mutable just of simple string;
+x := just of "abc";
+y : mutable simple string;
+y := match x with
+     case just of (s : simple string) -> s
+     end

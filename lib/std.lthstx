@@ -22,6 +22,12 @@ Syntax "mutable $a" := "@MUTABLE $a",
 Syntax "$a as $b" := "@RECURSIVE $b $a",
        level 0015, no associativity;
 
+Syntax "match $a with $b end" := "@MATCH $a $b",
+       level 0, no associativity;
+
+Syntax "case $a" := "@CASE $a",
+       level 0015, no associativity;
+
 Syntax "$a -> $b" := "@ARROW $a $b",
        level 0020, right associativity;
 
