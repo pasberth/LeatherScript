@@ -1,7 +1,11 @@
-x : mutable just of simple string;
-x := just of "abc";
-y : mutable simple string;
-y := match x with
-     case just of ("abc" : simple string) -> s;
-     case just of (s : simple string) -> s
-     end
+console : log of (simple string -> simple unit);
+
+s : mutable simple string;
+s := match 3 with
+     case (1 : simple int) -> "one";
+     case (2 : simple int) -> "two";
+     case (3 : simple int) -> "three";
+     case (4 : simple int) -> "four";
+     case (5 : simple int) -> "five"
+     end;
+console.log s
