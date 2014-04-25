@@ -140,6 +140,18 @@ function generate(ast) {
         left: ast1,
         right: ast2
       };
+    } else if (ast.ast[0].token === "@VARIANT") {
+      var tag = ast.ast[1].token;
+      var val = generate(ast.ast[2]);
+      return {
+        type: "ObjectExpression",
+        properties: [
+          { key: { type: "Identifier", name: tag },
+            value: val,
+            kind: "init"
+          }
+        ]
+      };
     } else if (ast.ast.length > 1) {
       var ast1 = generate(ast.ast[0]);
       var ast2 = generatePairs(ast.ast[1]);
