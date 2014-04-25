@@ -1,21 +1,36 @@
-addition : (simple number, simple number) -> simple number;
-subtraction : (simple number, simple number) -> simple number;
-multiplication : (simple number, simple number) -> simple number;
-division : (simple number, simple number) -> simple number;
+addition
+  : simple number, simple number
+  -> simple number;
+
+subtraction
+  : simple number, simple number
+  -> simple number;
+
+multiplication
+  : simple number, simple number
+  -> simple number;
+
+division
+  : simple number, simple number
+  -> simple number;
+
+lookup
+  : simple string, simple env
+  -> Simple of simple string;
 
 typing
-  : mutable (token of simple string
-            & type of mutable (Simple of simple string))
+  : mutable (identifier of simple string
+            & type of mutable (Simple of simple string)), simple env
             -> simple unit;
 typing
-  := (ast : (token of simple string
-            & type of mutable (Simple of simple string)))
+  := (ast : (identifier of simple string
+            & type of mutable (Simple of simple string))), (env : simple env)
   ->
 begin
   match ast with
-  case token of (tk : simple string) & type of (_ : mutable (Simple of simple string)) ->
+  case identifier of (s : simple string) & type of (_ : mutable (Simple of simple string)) ->
     begin
-      ast.type := Simple of "string"
+      ast.type := lookup(s,env)
     end
   end
 end
