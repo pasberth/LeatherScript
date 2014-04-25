@@ -92,6 +92,16 @@ function generatePairs(ast) {
   }
 }
 
+function generateParams(ast) {
+  if (ast.ast && ast.ast[0].token === "@ORDERED-PAIR") {
+    var l = generate(ast.ast[1]);
+    var r = generatePairs(ast.ast[2]);
+    return [l].concat(r);
+  } else {
+    return [generate(ast)];
+  }
+}
+
 function pairCount(type) {
   if (type.pair) {
     return 1 + pairCount(type.pair[1]);
@@ -110,6 +120,8 @@ function generate(ast) {
         object: obj,
         property: prop
       };
+    } else if (ast.ast[0].token === "@ASCRIBE") {
+      return generate(ast.ast[1]);
     } else if (ast.ast[0].token === "@SEQUENCE") {
       if (ast.ast[1].ast && ast.ast[1].ast[0].token === "@ASCRIBE") {
         var y = generate(ast.ast[2]);
@@ -151,6 +163,20 @@ function generate(ast) {
             kind: "init"
           }
         ]
+      };
+    } else if (ast.ast[0].token === "@ARROW") {
+      var ast1 = generateParams(ast.ast[1]);
+      var ast2 = generate(ast.ast[2]);
+      return {
+        type: "FunctionExpression",
+        params: ast1,
+        body: {
+          type: "BlockStatement"
+          , body: [{
+            type: "ReturnStatement",
+            argument: ast2
+          }]
+        }
       };
     } else if (ast.ast.length > 1) {
       var ast1 = generate(ast.ast[0]);
