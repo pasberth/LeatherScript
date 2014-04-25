@@ -97,6 +97,8 @@ function includeTy(ty1, ty2) {
     return includeTy(ty1.arrow[0], ty2.arrow[0]) && includeTy(ty1.arrow[1], ty2.arrow[1]);
   } else if (ty1.forall) {
     return true;
+  } else if (ty1.mutable && ty2.mutable) {
+    return includeTy(ty1.mutable, ty2.mutable);
   } else if (ty2.mutable) {
     return includeTy(ty1, ty2.mutable);
   } else if (ty1.recursive && ty2.recursive) {
