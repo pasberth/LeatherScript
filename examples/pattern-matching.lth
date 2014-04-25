@@ -2,10 +2,10 @@ console : log of (simple string -> simple unit);
 
 s : mutable simple string;
 s := match 3 with
-     case (1 : simple int) -> "one";
-     case (2 : simple int) -> "two";
-     case (3 : simple int) -> "three";
-     case (4 : simple int) -> "four";
-     case (5 : simple int) -> "five"
+     case (1 : simple number) -> "one";
+     case (2 : simple number) -> "two";
+     case (3 : simple number) -> "three";
+     case (4 : simple number) -> "four";
+     case (5 : simple number) -> "five"
      end;
 console.log s
