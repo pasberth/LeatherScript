@@ -26,9 +26,9 @@ fs.readFile(path2, 'utf8', function (err2, text2) {
     console.log(ast.ParseError);
     if (tks[ast.ParseError.at]) {
       var errTkn = tks[ast.ParseError.at];
-      console.log((errTkn.lineno + 1) + ":" + (errTkn.columnno + 1) + ": parse error on input `" + errTkn.token + "'");
+      console.warn((errTkn.lineno + 1) + ":" + (errTkn.columnno + 1) + ": parse error on input `" + errTkn.token + "'");
     } else {
-      console.log("unexpected EOF");
+      console.warn("unexpected EOF");
     }
   } else {
     console.log(JSON.stringify(ast, null, 2));
