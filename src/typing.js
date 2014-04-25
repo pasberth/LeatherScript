@@ -60,8 +60,6 @@ function includeTy(ty1, ty2) {
   } else if (ty2.mutable) {
     return includeTy(ty1, ty2.mutable);
   } else {
-    console.log(ty1);
-    console.log(ty2);
     return false;
   }
 }
@@ -268,14 +266,14 @@ function printErrors(ast) {
     };
 
     if (ast.type && ast.type.TypeError && ast.type.TypeError.Expected) {
-      console.log(showLocation(ast));
-      console.log("Expected type: " + typePP(ast.type.TypeError.Expected));
-      console.log("  Actual type: " + typePP(ast.type.TypeError.Got));
+      console.warn(showLocation(ast));
+      console.warn("Expected type: " + typePP(ast.type.TypeError.Expected));
+      console.warn("  Actual type: " + typePP(ast.type.TypeError.Got));
     }
   } else if (ast.token) {
     if (ast.type && ast.type.TypeError) {
       if (ast.type.TypeError.NotInScope) {
-        console.log(showLocation(ast) + "not in scope `" + ast.type.TypeError.NotInScope + "'");
+        console.warn(showLocation(ast) + "not in scope `" + ast.type.TypeError.NotInScope + "'");
       }
     }
   }

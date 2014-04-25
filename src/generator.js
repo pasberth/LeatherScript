@@ -26,7 +26,6 @@ function generateUPair(ast) {
     if (isObj(ast.ast[1].type) && isObj(ast.ast[2].type)) {
       var x = generateUPair(ast.ast[1]);
       var y = generateUPair(ast.ast[2]);
-      console.log(ast.ast[1].type);
       var k1 = keys(ast.ast[1].type);
       var k2 = keys(ast.ast[2].type); 
      var ret = { type: "ObjectExpression", properties: [] };
