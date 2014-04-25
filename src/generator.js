@@ -21,6 +21,19 @@ function keys(type) {
   }
 }
 
+function takeCases(ast) {
+  if (ast.ast[0].token === "@SEQUENCE") {
+    var asts1 = takeCases(ast.ast[1]);
+    var asts2 = takeCases(ast.ast[2]);
+    return asts1.concat(asts2);
+  } else if (ast.ast[0].token === "@CASE") {
+    return [ast.ast[1]];
+  }
+  else {
+    throw "an error occurred";
+  }
+}
+
 function generateUPair(ast) {
   if (ast.ast && ast.ast[0].token === "@UNORDERED-PAIR") {
     if (isObj(ast.ast[1].type) && isObj(ast.ast[2].type)) {
@@ -118,7 +131,7 @@ function mkTest(ast, it) {
     var x = generate(ast);
     if (x.type === "Identifier") {
       return {
-        type: "BinaryExpression",
+        type: "AssignmentExpression",
         operator: "=",
         left: x,
         right: it
@@ -210,7 +223,7 @@ function generate(ast) {
       var ast1 = generate(ast.ast[1]);
       var ast2 = generate(ast.ast[2]);
       return {
-        type: "BinaryExpression",
+        type: "AssignmentExpression",
         operator: "=",
         left: ast1,
         right: ast2
@@ -255,6 +268,69 @@ function generate(ast) {
             }])
         }
       };
+    } else if (ast.ast[0].token === "@MATCH") {
+      var it = generate(ast.ast[1]);
+      var cases = takeCases(ast.ast[2]);
+      return cases.reduce(function (l,r) {
+        var rr = generate({ ast: [ r, ast.ast[1] ]});
+        return esprima.parse('(function () { try { ' + escodegen.generate({ type: "ExpressionStatement", expression: l}) + ' } catch(e) { if (!(e instanceof NonExhaustivePatterns)) throw e; return ' + escodegen.generate({ type: "ExpressionStatement", expression: rr}) + ' } })()').body[0].expression;
+      },{
+        type: "CallExpression",
+        callee: {
+          type: "FunctionExpression",
+          params: [],
+          body: {
+            type: "BlockStatement",
+            body: [
+              esprima.parse('throw new NonExhaustivePatterns()').body[0]
+            ]
+          }
+        },
+        arguments: []
+      });
+/*      var patterns = [];
+      var cases = takeCases(ast.ast[2]);
+      for (var i = 0; i < cases.length; ++i) {
+        var arrow = cases[i];
+        var params = takeParams(arrow.ast[1]);
+        var ast1 = generateParams(arrow.ast[1]);
+        var tests = ast1.map(function (param, index) { return mkTest(params[index], param); });
+        var ast2 = generate(arrow.ast[2]);
+        patterns.push([
+          {
+            type: "BinaryExpression",
+            operator: "&&",
+            left: esprima.parse('arguments.length !=' + pairCount(ast.ast[1])).body[0].expression,
+            right: tests.map(function (x) {
+              return { type: "UnaryExpression",
+                     operator: "!",
+                     argument: x};
+            }).reduce(function (l,r) {
+              return {
+                type: "BinaryExpression",
+                operator: "&&",
+                left: l,
+                right: r
+              };
+            })
+          },
+          ast2
+        ]);
+      }
+      return {
+        type: "SequenceExpression",
+        expressions: patterns.map(function (xs) {
+          var test = xs[0];
+          var body = xs[1];
+          
+        }).concat([
+          { type: "BinaryExpression",
+            operator: "=",
+            left: {type: "Identifier", name: "it"},
+            right: it
+          }
+        ])
+      };*/
     } else if (ast.ast.length > 1) {
       var ast1 = generate(ast.ast[0]);
       var ast2 = generatePairs(ast.ast[1]);
